@@ -1,0 +1,359 @@
+{
+  "report_metadata": {
+    "generated_at": "2025-11-22T15:26:20.163494",
+    "version": "1.0",
+    "report_type": "comprehensive"
+  },
+  "summary": {
+    "timestamp": "2025-11-22T15:26:20.163494",
+    "scan": {
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": 0
+    },
+    "tests": {
+      "total_tests": 17,
+      "successful": 17,
+      "failed": 0
+    },
+    "system": {
+      "status": "[OK] COMPLETE",
+      "total_issues": 0,
+      "components": {
+        "rust": 4,
+        "redb": "OK",
+        "node_red": 2,
+        "svelte": 3
+      }
+    }
+  },
+  "scan_results": {},
+  "test_results": [
+    {
+      "scan_time": "2025-11-22T15:02:01.898507",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "antidebug_antivm_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:02.367537",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "capabilities_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:03.680426",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "crypto_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:03.949995",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "cve_rules_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:04.633864",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "email_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:05.580466",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "exploit_kits_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:13.788317",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "maldocs_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:16.655480",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "mobile_malware_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:19.063528",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "packers_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:19.601735",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "webshells_index"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:20.314163",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "antidebug_antivm"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:21.322666",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "capabilities"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:23.084152",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "crypto_signatures"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:23.787242",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "CVE-2010-0805"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:25.254290",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "CVE-2010-0887"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:26.013768",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "CVE-2010-1297"
+    },
+    {
+      "scan_time": "2025-11-22T15:02:27.004605",
+      "total_scanned": 0,
+      "total_matches": 0,
+      "matches": [],
+      "rule_name": "CVE-2012-0158"
+    }
+  ],
+  "system_audit": {
+    "timestamp": "2025-11-22T14:14:57.767422",
+    "rust": {
+      "crates": {
+        "cryptex-store": {
+          "exists": true,
+          "files": {
+            "src/lib.rs": true,
+            "Cargo.toml": true
+          },
+          "dependencies": {
+            "redb": true,
+            "serde": true,
+            "serde_json": true
+          },
+          "binaries": {
+            "import_cryptex": true
+          },
+          "issues": []
+        },
+        "cryptex-api": {
+          "exists": true,
+          "files": {
+            "src/main.rs": true,
+            "Cargo.toml": true,
+            "src/feed.rs": true
+          },
+          "dependencies": {
+            "axum": true,
+            "tokio": true,
+            "cryptex-store": true,
+            "yara-feed-scanner": true
+          },
+          "binaries": {
+            "cryptex-api": true
+          },
+          "issues": []
+        },
+        "yara-feed-scanner": {
+          "exists": true,
+          "files": {
+            "src/lib.rs": true,
+            "src/main.rs": true,
+            "Cargo.toml": true
+          },
+          "dependencies": {
+            "reqwest": true,
+            "tokio": true,
+            "rss": true,
+            "atom_syndication": true
+          },
+          "binaries": {
+            "yara-feed-scanner": true
+          },
+          "issues": []
+        },
+        "cryptex-cli": {
+          "exists": true,
+          "files": {
+            "src/main.rs": true,
+            "Cargo.toml": true
+          },
+          "dependencies": {
+            "clap": true,
+            "cryptex-store": true,
+            "yara-feed-scanner": true
+          },
+          "binaries": {
+            "cryptex": true
+          },
+          "issues": []
+        }
+      },
+      "files": {},
+      "dependencies": {},
+      "issues": []
+    },
+    "redb": {
+      "integration": {
+        "redb_import": true
+      },
+      "tables": {
+        "SYMBOL_TO_CODENAME": true,
+        "CODENAME_TO_ENTRY": true,
+        "ENTRIES_BY_KIND": true
+      },
+      "operations": {
+        "upsert_entry": true,
+        "lookup_by_symbol": true,
+        "lookup_by_codename": true,
+        "get_all_entries": true,
+        "get_entries_by_kind": true,
+        "search_entries": true
+      },
+      "issues": []
+    },
+    "node_red": {
+      "nodes": {
+        "cryptex-lookup": {
+          "exists": true,
+          "files": {
+            "cryptex-lookup.js": true,
+            "cryptex-search.js": true,
+            "cryptex-stats.js": true,
+            "package.json": true
+          },
+          "issues": []
+        },
+        "yara-feed-scanner": {
+          "exists": true,
+          "files": {
+            "yara-feed-scanner.js": true,
+            "package.json": true
+          },
+          "issues": []
+        }
+      },
+      "files": {},
+      "issues": []
+    },
+    "svelte": {
+      "components": {
+        "cryptex": {
+          "route": {
+            "exists": true,
+            "path": "src/routes/tools/yara/cryptex/+page.svelte"
+          },
+          "api_client": {
+            "exists": true,
+            "path": "src/lib/services/cryptexAPI.js"
+          },
+          "issues": []
+        },
+        "feed": {
+          "route": {
+            "exists": true,
+            "path": "src/routes/tools/yara/feed/+page.svelte"
+          },
+          "api_client": {
+            "exists": true,
+            "path": "src/lib/services/feedAPI.js"
+          },
+          "issues": []
+        },
+        "scan": {
+          "route": {
+            "exists": true,
+            "path": "src/routes/tools/yara/scan/+page.svelte"
+          },
+          "api_client": {},
+          "issues": []
+        }
+      },
+      "routes": {},
+      "api_clients": {},
+      "issues": []
+    },
+    "api": {
+      "endpoints": {
+        "/api/v2/yara/cryptex/lookup": true,
+        "/api/v2/yara/cryptex/search": true,
+        "/api/v2/yara/cryptex/all": true,
+        "/api/v2/yara/cryptex/stats": true,
+        "/api/v2/yara/feed/scan/all": true,
+        "/api/v2/yara/feed/scan/new-tasks": true,
+        "/api/v2/yara/feed/scan/old-tasks": true,
+        "/api/v2/yara/feed/scan/malware": true,
+        "/api/v2/yara/feed/scan/apt": true,
+        "/api/v2/yara/feed/scan/ransomware": true
+      },
+      "integration": {
+        "feed_router": true
+      },
+      "issues": []
+    },
+    "build": {
+      "scripts": {
+        "build.sh": {
+          "exists": true,
+          "description": "Linux/macOS build script"
+        },
+        "build.ps1": {
+          "exists": true,
+          "description": "Windows build script"
+        },
+        "Makefile": {
+          "exists": true,
+          "description": "Makefile"
+        }
+      },
+      "workspace": {
+        "cryptex-store": true,
+        "cryptex-api": true,
+        "yara-feed-scanner": true,
+        "cryptex-cli": true
+      },
+      "issues": []
+    },
+    "gaps": [],
+    "summary": {
+      "total_issues": 0,
+      "total_warnings": 0,
+      "total_success": 12,
+      "has_gaps": false,
+      "status": "[OK] COMPLETE"
+    }
+  }
+}

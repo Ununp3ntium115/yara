@@ -1,0 +1,207 @@
+{
+  "timestamp": "2025-11-22T14:14:57.767422",
+  "rust": {
+    "crates": {
+      "cryptex-store": {
+        "exists": true,
+        "files": {
+          "src/lib.rs": true,
+          "Cargo.toml": true
+        },
+        "dependencies": {
+          "redb": true,
+          "serde": true,
+          "serde_json": true
+        },
+        "binaries": {
+          "import_cryptex": true
+        },
+        "issues": []
+      },
+      "cryptex-api": {
+        "exists": true,
+        "files": {
+          "src/main.rs": true,
+          "Cargo.toml": true,
+          "src/feed.rs": true
+        },
+        "dependencies": {
+          "axum": true,
+          "tokio": true,
+          "cryptex-store": true,
+          "yara-feed-scanner": true
+        },
+        "binaries": {
+          "cryptex-api": true
+        },
+        "issues": []
+      },
+      "yara-feed-scanner": {
+        "exists": true,
+        "files": {
+          "src/lib.rs": true,
+          "src/main.rs": true,
+          "Cargo.toml": true
+        },
+        "dependencies": {
+          "reqwest": true,
+          "tokio": true,
+          "rss": true,
+          "atom_syndication": true
+        },
+        "binaries": {
+          "yara-feed-scanner": true
+        },
+        "issues": []
+      },
+      "cryptex-cli": {
+        "exists": true,
+        "files": {
+          "src/main.rs": true,
+          "Cargo.toml": true
+        },
+        "dependencies": {
+          "clap": true,
+          "cryptex-store": true,
+          "yara-feed-scanner": true
+        },
+        "binaries": {
+          "cryptex": true
+        },
+        "issues": []
+      }
+    },
+    "files": {},
+    "dependencies": {},
+    "issues": []
+  },
+  "redb": {
+    "integration": {
+      "redb_import": true
+    },
+    "tables": {
+      "SYMBOL_TO_CODENAME": true,
+      "CODENAME_TO_ENTRY": true,
+      "ENTRIES_BY_KIND": true
+    },
+    "operations": {
+      "upsert_entry": true,
+      "lookup_by_symbol": true,
+      "lookup_by_codename": true,
+      "get_all_entries": true,
+      "get_entries_by_kind": true,
+      "search_entries": true
+    },
+    "issues": []
+  },
+  "node_red": {
+    "nodes": {
+      "cryptex-lookup": {
+        "exists": true,
+        "files": {
+          "cryptex-lookup.js": true,
+          "cryptex-search.js": true,
+          "cryptex-stats.js": true,
+          "package.json": true
+        },
+        "issues": []
+      },
+      "yara-feed-scanner": {
+        "exists": true,
+        "files": {
+          "yara-feed-scanner.js": true,
+          "package.json": true
+        },
+        "issues": []
+      }
+    },
+    "files": {},
+    "issues": []
+  },
+  "svelte": {
+    "components": {
+      "cryptex": {
+        "route": {
+          "exists": true,
+          "path": "src/routes/tools/yara/cryptex/+page.svelte"
+        },
+        "api_client": {
+          "exists": true,
+          "path": "src/lib/services/cryptexAPI.js"
+        },
+        "issues": []
+      },
+      "feed": {
+        "route": {
+          "exists": true,
+          "path": "src/routes/tools/yara/feed/+page.svelte"
+        },
+        "api_client": {
+          "exists": true,
+          "path": "src/lib/services/feedAPI.js"
+        },
+        "issues": []
+      },
+      "scan": {
+        "route": {
+          "exists": true,
+          "path": "src/routes/tools/yara/scan/+page.svelte"
+        },
+        "api_client": {},
+        "issues": []
+      }
+    },
+    "routes": {},
+    "api_clients": {},
+    "issues": []
+  },
+  "api": {
+    "endpoints": {
+      "/api/v2/yara/cryptex/lookup": true,
+      "/api/v2/yara/cryptex/search": true,
+      "/api/v2/yara/cryptex/all": true,
+      "/api/v2/yara/cryptex/stats": true,
+      "/api/v2/yara/feed/scan/all": true,
+      "/api/v2/yara/feed/scan/new-tasks": true,
+      "/api/v2/yara/feed/scan/old-tasks": true,
+      "/api/v2/yara/feed/scan/malware": true,
+      "/api/v2/yara/feed/scan/apt": true,
+      "/api/v2/yara/feed/scan/ransomware": true
+    },
+    "integration": {
+      "feed_router": true
+    },
+    "issues": []
+  },
+  "build": {
+    "scripts": {
+      "build.sh": {
+        "exists": true,
+        "description": "Linux/macOS build script"
+      },
+      "build.ps1": {
+        "exists": true,
+        "description": "Windows build script"
+      },
+      "Makefile": {
+        "exists": true,
+        "description": "Makefile"
+      }
+    },
+    "workspace": {
+      "cryptex-store": true,
+      "cryptex-api": true,
+      "yara-feed-scanner": true,
+      "cryptex-cli": true
+    },
+    "issues": []
+  },
+  "gaps": [],
+  "summary": {
+    "total_issues": 0,
+    "total_warnings": 0,
+    "total_success": 12,
+    "has_gaps": false,
+    "status": "[OK] COMPLETE"
+  }
+}

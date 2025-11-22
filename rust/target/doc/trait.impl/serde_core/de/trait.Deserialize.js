@@ -1,0 +1,9 @@
+(function() {
+    var implementors = Object.fromEntries([["yara_feed_scanner",[["impl&lt;'de&gt; <a class=\"trait\" href=\"https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html\" title=\"trait serde_core::de::Deserialize\">Deserialize</a>&lt;'de&gt; for <a class=\"enum\" href=\"yara_feed_scanner/enum.FeedType.html\" title=\"enum yara_feed_scanner::FeedType\">FeedType</a>"],["impl&lt;'de&gt; <a class=\"trait\" href=\"https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html\" title=\"trait serde_core::de::Deserialize\">Deserialize</a>&lt;'de&gt; for <a class=\"struct\" href=\"yara_feed_scanner/struct.DiscoveredRule.html\" title=\"struct yara_feed_scanner::DiscoveredRule\">DiscoveredRule</a>"],["impl&lt;'de&gt; <a class=\"trait\" href=\"https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html\" title=\"trait serde_core::de::Deserialize\">Deserialize</a>&lt;'de&gt; for <a class=\"struct\" href=\"yara_feed_scanner/struct.RuleMetadata.html\" title=\"struct yara_feed_scanner::RuleMetadata\">RuleMetadata</a>"],["impl&lt;'de&gt; <a class=\"trait\" href=\"https://docs.rs/serde_core/1.0.228/serde_core/de/trait.Deserialize.html\" title=\"trait serde_core::de::Deserialize\">Deserialize</a>&lt;'de&gt; for <a class=\"struct\" href=\"yara_feed_scanner/struct.YaraRuleSource.html\" title=\"struct yara_feed_scanner::YaraRuleSource\">YaraRuleSource</a>"]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":57,"fragment_lengths":[1349]}

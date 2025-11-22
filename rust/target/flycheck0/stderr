@@ -1,0 +1,31 @@
+warning: cryptex-cli v0.1.0 (E:\GitRepos\Yara\yara\rust\cryptex-cli) ignoring invalid dependency `cryptex-api` which is missing a lib target
+   2.629225000s  INFO prepare_target{force=false package_id=cryptex-store v0.1.0 (E:\GitRepos\Yara\yara\rust\cryptex-store) target="cryptex_store"}: cargo::core::compiler::fingerprint: fingerprint error for cryptex-store v0.1.0 (E:\GitRepos\Yara\yara\rust\cryptex-store)/Check { test: true }/TargetInner { ..: lib_target("cryptex_store", ["lib"], "E:\\GitRepos\\Yara\\yara\\rust\\cryptex-store\\src\\lib.rs", Edition2021) }
+   2.629290500s  INFO prepare_target{force=false package_id=cryptex-store v0.1.0 (E:\GitRepos\Yara\yara\rust\cryptex-store) target="cryptex_store"}: cargo::core::compiler::fingerprint:     err: failed to read `E:\GitRepos\Yara\yara\rust\target\debug\.fingerprint\cryptex-store-5cddc07691e34ae8\test-lib-cryptex_store`
+
+Caused by:
+    The system cannot find the file specified. (os error 2)
+
+Stack backtrace:
+   0: git_midx_writer_dump
+   1: git_midx_writer_dump
+   2: git_midx_writer_dump
+   3: git_midx_writer_dump
+   4: git_filter_source_repo
+   5: git_filter_source_path
+   6: git_filter_source_path
+   7: git_filter_source_path
+   8: git_filter_source_path
+   9: git_filter_source_repo
+  10: git_filter_source_repo
+  11: git_filter_source_repo
+  12: git_filter_source_repo
+  13: git_filter_source_repo
+  14: <unknown>
+  15: <unknown>
+  16: git_midx_writer_dump
+  17: git_filter_source_repo
+  18: git_midx_writer_dump
+  19: BaseThreadInitThunk
+  20: RtlUserThreadStart
+    Checking cryptex-store v0.1.0 (E:\GitRepos\Yara\yara\rust\cryptex-store)
+error: could not compile `cryptex-store` (lib test) due to 1 previous error

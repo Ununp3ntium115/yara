@@ -1,0 +1,12 @@
+Package: yara-cryptex
+Version: 0.1.0
+Section: utils
+Priority: optional
+Architecture: amd64
+Depends: libc6 (>= 2.17)
+Maintainer: PYRO Platform <pyro@example.com>
+Description: YARA Cryptex Dictionary System
+ Complete YARA Cryptex dictionary with 587 entries, feed scanner,
+ and API server. Provides command-line tools and REST API for
+ YARA function mapping and rule discovery.
+

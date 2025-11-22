@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git clone:*)",
+      "Bash(./bootstrap.sh:*)",
+      "Bash(pip install:*)",
+      "Bash(python -c:*)",
+      "Bash(python yara_scanner.py:*)",
+      "Bash(python create_safe_rules.py:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,17 @@
+[package]
+name = "cryptex-api"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "cryptex-api"
+path = "src/main.rs"
+
+[dependencies]
+axum = "0.7"
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+cryptex-store = { path = "../cryptex-store" }
+yara-feed-scanner = { path = "../yara-feed-scanner" }
+

@@ -1,0 +1,2650 @@
+{
+  "download_date": "2025-11-22",
+  "categories": {
+    "crypto": [
+      {
+        "name": "crypto_signatures.yar",
+        "size": 76593,
+        "path": "/test_rules/yara-rules-extracted/rules-master/crypto/crypto_signatures.yar"
+      }
+    ],
+    "rules-master": [
+      {
+        "name": "antidebug_antivm_index.yar",
+        "size": 94,
+        "path": "/test_rules/yara-rules-extracted/rules-master/antidebug_antivm_index.yar"
+      },
+      {
+        "name": "capabilities_index.yar",
+        "size": 86,
+        "path": "/test_rules/yara-rules-extracted/rules-master/capabilities_index.yar"
+      },
+      {
+        "name": "crypto_index.yar",
+        "size": 85,
+        "path": "/test_rules/yara-rules-extracted/rules-master/crypto_index.yar"
+      },
+      {
+        "name": "cve_rules_index.yar",
+        "size": 606,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules_index.yar"
+      },
+      {
+        "name": "email_index.yar",
+        "size": 476,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email_index.yar"
+      },
+      {
+        "name": "exploit_kits_index.yar",
+        "size": 490,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits_index.yar"
+      },
+      {
+        "name": "index_w_mobile.yar",
+        "size": 19945,
+        "path": "/test_rules/yara-rules-extracted/rules-master/index_w_mobile.yar"
+      },
+      {
+        "name": "index.yar",
+        "size": 19945,
+        "path": "/test_rules/yara-rules-extracted/rules-master/index.yar"
+      },
+      {
+        "name": "maldocs_index.yar",
+        "size": 952,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs_index.yar"
+      },
+      {
+        "name": "malware_index.yar",
+        "size": 16804,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware_index.yar"
+      },
+      {
+        "name": "mobile_malware_index.yar",
+        "size": 44,
+        "path": "/test_rules/yara-rules-extracted/rules-master/mobile_malware_index.yar"
+      },
+      {
+        "name": "packers_index.yar",
+        "size": 294,
+        "path": "/test_rules/yara-rules-extracted/rules-master/packers_index.yar"
+      },
+      {
+        "name": "webshells_index.yar",
+        "size": 454,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells_index.yar"
+      }
+    ],
+    "exploit_kits": [
+      {
+        "name": "EK_Angler.yar",
+        "size": 10889,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Angler.yar"
+      },
+      {
+        "name": "EK_Blackhole.yar",
+        "size": 14656,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Blackhole.yar"
+      },
+      {
+        "name": "EK_BleedingLife.yar",
+        "size": 3401,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_BleedingLife.yar"
+      },
+      {
+        "name": "EK_Crimepack.yar",
+        "size": 1349,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Crimepack.yar"
+      },
+      {
+        "name": "EK_Eleonore.yar",
+        "size": 4875,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Eleonore.yar"
+      },
+      {
+        "name": "EK_Fragus.yar",
+        "size": 8455,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Fragus.yar"
+      },
+      {
+        "name": "EK_Phoenix.yar",
+        "size": 17029,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Phoenix.yar"
+      },
+      {
+        "name": "EK_Sakura.yar",
+        "size": 2047,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Sakura.yar"
+      },
+      {
+        "name": "EK_ZeroAcces.yar",
+        "size": 8675,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_ZeroAcces.yar"
+      },
+      {
+        "name": "EK_Zerox88.yar",
+        "size": 1622,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Zerox88.yar"
+      },
+      {
+        "name": "EK_Zeus.yar",
+        "size": 987,
+        "path": "/test_rules/yara-rules-extracted/rules-master/exploit_kits/EK_Zeus.yar"
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "capabilities.yar",
+        "size": 23295,
+        "path": "/test_rules/yara-rules-extracted/rules-master/capabilities/capabilities.yar"
+      }
+    ],
+    "cve_rules": [
+      {
+        "name": "CVE-2010-0805.yar",
+        "size": 652,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2010-0805.yar"
+      },
+      {
+        "name": "CVE-2010-0887.yar",
+        "size": 824,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2010-0887.yar"
+      },
+      {
+        "name": "CVE-2010-1297.yar",
+        "size": 629,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2010-1297.yar"
+      },
+      {
+        "name": "CVE-2012-0158.yar",
+        "size": 1232,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2012-0158.yar"
+      },
+      {
+        "name": "CVE-2013-0074.yar",
+        "size": 528,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2013-0074.yar"
+      },
+      {
+        "name": "CVE-2013-0422.yar",
+        "size": 1086,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2013-0422.yar"
+      },
+      {
+        "name": "CVE-2015-1701.yar",
+        "size": 989,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2015-1701.yar"
+      },
+      {
+        "name": "CVE-2015-2426.yar",
+        "size": 2259,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2015-2426.yar"
+      },
+      {
+        "name": "CVE-2015-2545.yar",
+        "size": 2671,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2015-2545.yar"
+      },
+      {
+        "name": "CVE-2015-5119.yar",
+        "size": 775,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2015-5119.yar"
+      },
+      {
+        "name": "CVE-2016-5195.yar",
+        "size": 1502,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2016-5195.yar"
+      },
+      {
+        "name": "CVE-2017-11882.yar",
+        "size": 2668,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2017-11882.yar"
+      },
+      {
+        "name": "CVE-2018-20250.yar",
+        "size": 877,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2018-20250.yar"
+      },
+      {
+        "name": "CVE-2018-4878.yar",
+        "size": 1319,
+        "path": "/test_rules/yara-rules-extracted/rules-master/cve_rules/CVE-2018-4878.yar"
+      }
+    ],
+    "antidebug_antivm": [
+      {
+        "name": "antidebug_antivm.yar",
+        "size": 27570,
+        "path": "/test_rules/yara-rules-extracted/rules-master/antidebug_antivm/antidebug_antivm.yar"
+      }
+    ],
+    "packers": [
+      {
+        "name": "Javascript_exploit_and_obfuscation.yar",
+        "size": 3617,
+        "path": "/test_rules/yara-rules-extracted/rules-master/packers/Javascript_exploit_and_obfuscation.yar"
+      },
+      {
+        "name": "JJencode.yar",
+        "size": 614,
+        "path": "/test_rules/yara-rules-extracted/rules-master/packers/JJencode.yar"
+      },
+      {
+        "name": "packer_compiler_signatures.yar",
+        "size": 21462,
+        "path": "/test_rules/yara-rules-extracted/rules-master/packers/packer_compiler_signatures.yar"
+      },
+      {
+        "name": "packer.yar",
+        "size": 562019,
+        "path": "/test_rules/yara-rules-extracted/rules-master/packers/packer.yar"
+      },
+      {
+        "name": "peid.yar",
+        "size": 2742475,
+        "path": "/test_rules/yara-rules-extracted/rules-master/packers/peid.yar"
+      },
+      {
+        "name": "tweetable-polyglot-png.yar",
+        "size": 414,
+        "path": "/test_rules/yara-rules-extracted/rules-master/packers/tweetable-polyglot-png.yar"
+      }
+    ],
+    "Malware": [
+      {
+        "name": "MALW_Retefe.yar",
+        "size": 553,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Malware/MALW_Retefe.yar"
+      },
+      {
+        "name": "000_common_rules.yar",
+        "size": 1260,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/000_common_rules.yar"
+      },
+      {
+        "name": "APT_APT1.yar",
+        "size": 30589,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_APT1.yar"
+      },
+      {
+        "name": "APT_APT10.yar",
+        "size": 4533,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_APT10.yar"
+      },
+      {
+        "name": "APT_APT15.yar",
+        "size": 7601,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_APT15.yar"
+      },
+      {
+        "name": "APT_APT17.yar",
+        "size": 1020,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_APT17.yar"
+      },
+      {
+        "name": "APT_APT29_Grizzly_Steppe.yar",
+        "size": 3441,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_APT29_Grizzly_Steppe.yar"
+      },
+      {
+        "name": "APT_APT3102.yar",
+        "size": 829,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_APT3102.yar"
+      },
+      {
+        "name": "APT_APT9002.yar",
+        "size": 1658,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_APT9002.yar"
+      },
+      {
+        "name": "APT_Backspace.yar",
+        "size": 672,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Backspace.yar"
+      },
+      {
+        "name": "APT_Bestia.yar",
+        "size": 1231,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Bestia.yar"
+      },
+      {
+        "name": "APT_Blackenergy.yar",
+        "size": 8179,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Blackenergy.yar"
+      },
+      {
+        "name": "APT_Bluetermite_Emdivi.yar",
+        "size": 5772,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Bluetermite_Emdivi.yar"
+      },
+      {
+        "name": "APT_C16.yar",
+        "size": 4435,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_C16.yar"
+      },
+      {
+        "name": "APT_Carbanak.yar",
+        "size": 2135,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Carbanak.yar"
+      },
+      {
+        "name": "APT_Careto.yar",
+        "size": 2080,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Careto.yar"
+      },
+      {
+        "name": "APT_Casper.yar",
+        "size": 3741,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Casper.yar"
+      },
+      {
+        "name": "APT_CheshireCat.yar",
+        "size": 4748,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_CheshireCat.yar"
+      },
+      {
+        "name": "APT_Cloudduke.yar",
+        "size": 3219,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Cloudduke.yar"
+      },
+      {
+        "name": "APT_Cobalt.yar",
+        "size": 705,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Cobalt.yar"
+      },
+      {
+        "name": "APT_Codoso.yar",
+        "size": 15806,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Codoso.yar"
+      },
+      {
+        "name": "APT_CrashOverride.yar",
+        "size": 5526,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_CrashOverride.yar"
+      },
+      {
+        "name": "APT_DeepPanda_Anthem.yar",
+        "size": 4378,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_DeepPanda_Anthem.yar"
+      },
+      {
+        "name": "APT_DeputyDog.yar",
+        "size": 1170,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_DeputyDog.yar"
+      },
+      {
+        "name": "APT_Derusbi.yar",
+        "size": 11373,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Derusbi.yar"
+      },
+      {
+        "name": "APT_DPRK_ROKRAT.yar",
+        "size": 3050,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_DPRK_ROKRAT.yar"
+      },
+      {
+        "name": "APT_Dubnium.yar",
+        "size": 6414,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Dubnium.yar"
+      },
+      {
+        "name": "APT_Duqu2.yar",
+        "size": 6313,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Duqu2.yar"
+      },
+      {
+        "name": "APT_Emissary.yar",
+        "size": 2352,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Emissary.yar"
+      },
+      {
+        "name": "APT_EnergeticBear_backdoored_ssh.yar",
+        "size": 299,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_EnergeticBear_backdoored_ssh.yar"
+      },
+      {
+        "name": "APT_eqgrp_apr17.yar",
+        "size": 145297,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_eqgrp_apr17.yar"
+      },
+      {
+        "name": "APT_Equation.yar",
+        "size": 21700,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Equation.yar"
+      },
+      {
+        "name": "APT_EQUATIONGRP.yar",
+        "size": 51851,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_EQUATIONGRP.yar"
+      },
+      {
+        "name": "APT_fancybear_dnc.yar",
+        "size": 1304,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_fancybear_dnc.yar"
+      },
+      {
+        "name": "APT_fancybear_downdelph.yar",
+        "size": 732,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_fancybear_downdelph.yar"
+      },
+      {
+        "name": "APT_FiveEyes.yar",
+        "size": 12003,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_FiveEyes.yar"
+      },
+      {
+        "name": "APT_furtim.yar",
+        "size": 1691,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_furtim.yar"
+      },
+      {
+        "name": "APT_FVEY_ShadowBrokers_Jan17_Screen_Strings.yar",
+        "size": 1680,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_FVEY_ShadowBrokers_Jan17_Screen_Strings.yar"
+      },
+      {
+        "name": "APT_Grasshopper.yar",
+        "size": 3045,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Grasshopper.yar"
+      },
+      {
+        "name": "APT_Greenbug.yar",
+        "size": 4946,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Greenbug.yar"
+      },
+      {
+        "name": "APT_Grizzlybear_uscert.yar",
+        "size": 76593,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Grizzlybear_uscert.yar"
+      },
+      {
+        "name": "APT_HackingTeam.yar",
+        "size": 5778,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_HackingTeam.yar"
+      },
+      {
+        "name": "APT_Hellsing.yar",
+        "size": 5543,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Hellsing.yar"
+      },
+      {
+        "name": "APT_HiddenCobra.yar",
+        "size": 7065,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_HiddenCobra.yar"
+      },
+      {
+        "name": "APT_Hikit.yar",
+        "size": 373,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Hikit.yar"
+      },
+      {
+        "name": "APT_Industroyer.yar",
+        "size": 5601,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Industroyer.yar"
+      },
+      {
+        "name": "APT_Irontiger.yar",
+        "size": 17808,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Irontiger.yar"
+      },
+      {
+        "name": "APT_Kaba.yar",
+        "size": 930,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Kaba.yar"
+      },
+      {
+        "name": "APT_Ke3Chang_TidePool.yar",
+        "size": 1556,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Ke3Chang_TidePool.yar"
+      },
+      {
+        "name": "APT_KeyBoy.yar",
+        "size": 8116,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_KeyBoy.yar"
+      },
+      {
+        "name": "APT_LotusBlossom.yar",
+        "size": 537,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_LotusBlossom.yar"
+      },
+      {
+        "name": "APT_Minidionis.yar",
+        "size": 3553,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Minidionis.yar"
+      },
+      {
+        "name": "APT_Mirage.yar",
+        "size": 1085,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Mirage.yar"
+      },
+      {
+        "name": "APT_Molerats.yar",
+        "size": 803,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Molerats.yar"
+      },
+      {
+        "name": "APT_Mongall.yar",
+        "size": 1503,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Mongall.yar"
+      },
+      {
+        "name": "APT_MoonlightMaze.yar",
+        "size": 6684,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_MoonlightMaze.yar"
+      },
+      {
+        "name": "APT_NGO.yar",
+        "size": 1175,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_NGO.yar"
+      },
+      {
+        "name": "APT_Oilrig.yar",
+        "size": 8636,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Oilrig.yar"
+      },
+      {
+        "name": "APT_OpClandestineWolf.yar",
+        "size": 2154,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_OpClandestineWolf.yar"
+      },
+      {
+        "name": "APT_OPCleaver.yar",
+        "size": 14857,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_OPCleaver.yar"
+      },
+      {
+        "name": "APT_OpDustStorm.yar",
+        "size": 5520,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_OpDustStorm.yar"
+      },
+      {
+        "name": "APT_OpPotao.yar",
+        "size": 4750,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_OpPotao.yar"
+      },
+      {
+        "name": "APT_Passcv.yar",
+        "size": 6502,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Passcv.yar"
+      },
+      {
+        "name": "APT_PCclient.yar",
+        "size": 960,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_PCclient.yar"
+      },
+      {
+        "name": "APT_Pipcreat.yar",
+        "size": 906,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Pipcreat.yar"
+      },
+      {
+        "name": "APT_Platinum.yar",
+        "size": 11897,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Platinum.yar"
+      },
+      {
+        "name": "APT_Poseidon_Group.yar",
+        "size": 4117,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Poseidon_Group.yar"
+      },
+      {
+        "name": "APT_Prikormka.yar",
+        "size": 5277,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Prikormka.yar"
+      },
+      {
+        "name": "APT_PutterPanda.yar",
+        "size": 16054,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_PutterPanda.yar"
+      },
+      {
+        "name": "APT_RedLeaves.yar",
+        "size": 1386,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_RedLeaves.yar"
+      },
+      {
+        "name": "APT_Regin.yar",
+        "size": 16310,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Regin.yar"
+      },
+      {
+        "name": "APT_RemSec.yar",
+        "size": 1638,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_RemSec.yar"
+      },
+      {
+        "name": "APT_Sauron_extras.yar",
+        "size": 8816,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Sauron_extras.yar"
+      },
+      {
+        "name": "APT_Sauron.yar",
+        "size": 4756,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Sauron.yar"
+      },
+      {
+        "name": "APT_Scarab_Scieron.yar",
+        "size": 1510,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Scarab_Scieron.yar"
+      },
+      {
+        "name": "APT_Seaduke.yar",
+        "size": 967,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Seaduke.yar"
+      },
+      {
+        "name": "APT_Shamoon_StoneDrill.yar",
+        "size": 1733,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Shamoon_StoneDrill.yar"
+      },
+      {
+        "name": "APT_Snowglobe_Babar.yar",
+        "size": 1576,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Snowglobe_Babar.yar"
+      },
+      {
+        "name": "APT_Sofacy_Bundestag.yar",
+        "size": 4002,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Sofacy_Bundestag.yar"
+      },
+      {
+        "name": "APT_Sofacy_Fysbis.yar",
+        "size": 2433,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Sofacy_Fysbis.yar"
+      },
+      {
+        "name": "APT_Sofacy_Jun16.yar",
+        "size": 2183,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Sofacy_Jun16.yar"
+      },
+      {
+        "name": "APT_Sphinx_Moth.yar",
+        "size": 5065,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Sphinx_Moth.yar"
+      },
+      {
+        "name": "APT_Stuxnet.yar",
+        "size": 9101,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Stuxnet.yar"
+      },
+      {
+        "name": "APT_Terracota.yar",
+        "size": 5038,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Terracota.yar"
+      },
+      {
+        "name": "APT_ThreatGroup3390.yar",
+        "size": 13176,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_ThreatGroup3390.yar"
+      },
+      {
+        "name": "APT_TradeSecret.yar",
+        "size": 1052,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_TradeSecret.yar"
+      },
+      {
+        "name": "APT_Turla_Neuron.yar",
+        "size": 2144,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Turla_Neuron.yar"
+      },
+      {
+        "name": "APT_Turla_RUAG.yar",
+        "size": 11116,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Turla_RUAG.yar"
+      },
+      {
+        "name": "APT_Unit78020.yar",
+        "size": 6278,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Unit78020.yar"
+      },
+      {
+        "name": "APT_UP007_SLServer.yar",
+        "size": 4530,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_UP007_SLServer.yar"
+      },
+      {
+        "name": "APT_Uppercut.yar",
+        "size": 842,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Uppercut.yar"
+      },
+      {
+        "name": "APT_Waterbug.yar",
+        "size": 4484,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Waterbug.yar"
+      },
+      {
+        "name": "APT_WildNeutron.yar",
+        "size": 19377,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_WildNeutron.yar"
+      },
+      {
+        "name": "APT_Windigo_Onimiki.yar",
+        "size": 2825,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Windigo_Onimiki.yar"
+      },
+      {
+        "name": "APT_Winnti.yar",
+        "size": 6578,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_Winnti.yar"
+      },
+      {
+        "name": "APT_WoolenGoldfish.yar",
+        "size": 3859,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/APT_WoolenGoldfish.yar"
+      },
+      {
+        "name": "EXPERIMENTAL_Beef.yar",
+        "size": 1705,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/EXPERIMENTAL_Beef.yar"
+      },
+      {
+        "name": "GEN_PowerShell.yar",
+        "size": 852,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/GEN_PowerShell.yar"
+      },
+      {
+        "name": "MalConfScan.yar",
+        "size": 17569,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MalConfScan.yar"
+      },
+      {
+        "name": "MALW_adwind_RAT.yar",
+        "size": 394,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_adwind_RAT.yar"
+      },
+      {
+        "name": "MALW_AgentTesla_SMTP.yar",
+        "size": 751,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_AgentTesla_SMTP.yar"
+      },
+      {
+        "name": "MALW_AgentTesla.yar",
+        "size": 828,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_AgentTesla.yar"
+      },
+      {
+        "name": "MALW_Alina.yar",
+        "size": 453,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Alina.yar"
+      },
+      {
+        "name": "MALW_AlMashreq.yar",
+        "size": 1393,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_AlMashreq.yar"
+      },
+      {
+        "name": "MALW_Andromeda.yar",
+        "size": 1707,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Andromeda.yar"
+      },
+      {
+        "name": "MALW_Arkei.yar",
+        "size": 638,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Arkei.yar"
+      },
+      {
+        "name": "MALW_Athena.yar",
+        "size": 3149,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Athena.yar"
+      },
+      {
+        "name": "MALW_ATM_HelloWorld.yar",
+        "size": 714,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_ATM_HelloWorld.yar"
+      },
+      {
+        "name": "MALW_Atmos.yar",
+        "size": 4512,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Atmos.yar"
+      },
+      {
+        "name": "MALW_ATMPot.yar",
+        "size": 1383,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_ATMPot.yar"
+      },
+      {
+        "name": "MALW_AZORULT.yar",
+        "size": 1427,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_AZORULT.yar"
+      },
+      {
+        "name": "MALW_BackdoorSSH.yar",
+        "size": 993,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_BackdoorSSH.yar"
+      },
+      {
+        "name": "MALW_Backoff.yar",
+        "size": 543,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Backoff.yar"
+      },
+      {
+        "name": "MALW_Bangat.yar",
+        "size": 1151,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Bangat.yar"
+      },
+      {
+        "name": "MALW_Batel.yar",
+        "size": 768,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Batel.yar"
+      },
+      {
+        "name": "MALW_BlackRev.yar",
+        "size": 1000,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_BlackRev.yar"
+      },
+      {
+        "name": "MALW_BlackWorm.yar",
+        "size": 826,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_BlackWorm.yar"
+      },
+      {
+        "name": "MALW_Boouset.yar",
+        "size": 524,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Boouset.yar"
+      },
+      {
+        "name": "MALW_Bublik.yar",
+        "size": 522,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Bublik.yar"
+      },
+      {
+        "name": "MALW_Buzus_Softpulse.yar",
+        "size": 905,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Buzus_Softpulse.yar"
+      },
+      {
+        "name": "MALW_CAP_HookExKeylogger.yar",
+        "size": 546,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_CAP_HookExKeylogger.yar"
+      },
+      {
+        "name": "MALW_Chicken.yar",
+        "size": 1571,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Chicken.yar"
+      },
+      {
+        "name": "MALW_Citadel.yar",
+        "size": 1496,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Citadel.yar"
+      },
+      {
+        "name": "MALW_Cloaking.yar",
+        "size": 1807,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Cloaking.yar"
+      },
+      {
+        "name": "MALW_Cookies.yar",
+        "size": 1195,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Cookies.yar"
+      },
+      {
+        "name": "MALW_Corkow.yar",
+        "size": 799,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Corkow.yar"
+      },
+      {
+        "name": "MALW_Cxpid.yar",
+        "size": 875,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Cxpid.yar"
+      },
+      {
+        "name": "MALW_Cythosia.yar",
+        "size": 497,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Cythosia.yar"
+      },
+      {
+        "name": "MALW_DDoSTf.yar",
+        "size": 758,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_DDoSTf.yar"
+      },
+      {
+        "name": "MALW_Derkziel.yar",
+        "size": 783,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Derkziel.yar"
+      },
+      {
+        "name": "MALW_Dexter.yar",
+        "size": 1074,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Dexter.yar"
+      },
+      {
+        "name": "MALW_DiamondFox.yar",
+        "size": 605,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_DiamondFox.yar"
+      },
+      {
+        "name": "MALW_DirtJumper.yar",
+        "size": 3187,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_DirtJumper.yar"
+      },
+      {
+        "name": "MALW_Eicar.yar",
+        "size": 317,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Eicar.yar"
+      },
+      {
+        "name": "MALW_Elex.yar",
+        "size": 3213,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Elex.yar"
+      },
+      {
+        "name": "MALW_Elknot.yar",
+        "size": 2365,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Elknot.yar"
+      },
+      {
+        "name": "MALW_Emotet.yar",
+        "size": 521,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Emotet.yar"
+      },
+      {
+        "name": "MALW_Empire.yar",
+        "size": 24394,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Empire.yar"
+      },
+      {
+        "name": "MALW_Enfal.yar",
+        "size": 4158,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Enfal.yar"
+      },
+      {
+        "name": "MALW_Exploit_UAC_Elevators.yar",
+        "size": 4979,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Exploit_UAC_Elevators.yar"
+      },
+      {
+        "name": "MALW_Ezcob.yar",
+        "size": 900,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Ezcob.yar"
+      },
+      {
+        "name": "MALW_F0xy.yar",
+        "size": 484,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_F0xy.yar"
+      },
+      {
+        "name": "MALW_FakeM.yar",
+        "size": 2437,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_FakeM.yar"
+      },
+      {
+        "name": "MALW_FALLCHILL.yar",
+        "size": 789,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_FALLCHILL.yar"
+      },
+      {
+        "name": "MALW_Fareit.yar",
+        "size": 1183,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Fareit.yar"
+      },
+      {
+        "name": "MALW_Favorite.yar",
+        "size": 1041,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Favorite.yar"
+      },
+      {
+        "name": "MALW_FUDCrypt.yar",
+        "size": 1075,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_FUDCrypt.yar"
+      },
+      {
+        "name": "MALW_Furtim.yar",
+        "size": 105113,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Furtim.yar"
+      },
+      {
+        "name": "MALW_Gafgyt.yar",
+        "size": 2799,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Gafgyt.yar"
+      },
+      {
+        "name": "MALW_Genome.yar",
+        "size": 580,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Genome.yar"
+      },
+      {
+        "name": "MALW_Glasses.yar",
+        "size": 1777,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Glasses.yar"
+      },
+      {
+        "name": "MALW_Gozi.yar",
+        "size": 594,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Gozi.yar"
+      },
+      {
+        "name": "MALW_Grozlex.yar",
+        "size": 521,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Grozlex.yar"
+      },
+      {
+        "name": "MALW_Hajime.yar",
+        "size": 3357,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Hajime.yar"
+      },
+      {
+        "name": "MALW_hancitor.yar",
+        "size": 858,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_hancitor.yar"
+      },
+      {
+        "name": "MALW_Hsdfihdf_banking.yar",
+        "size": 1114,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Hsdfihdf_banking.yar"
+      },
+      {
+        "name": "MALW_Httpsd_ELF.yar",
+        "size": 2622,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Httpsd_ELF.yar"
+      },
+      {
+        "name": "MALW_IcedID.yar",
+        "size": 1272,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_IcedID.yar"
+      },
+      {
+        "name": "MALW_Iexpl0ree.yar",
+        "size": 1894,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Iexpl0ree.yar"
+      },
+      {
+        "name": "MALW_IMuler.yar",
+        "size": 1857,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_IMuler.yar"
+      },
+      {
+        "name": "MALW_Install11.yar",
+        "size": 1134,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Install11.yar"
+      },
+      {
+        "name": "MALW_Intel_Virtualization.yar",
+        "size": 1241,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Intel_Virtualization.yar"
+      },
+      {
+        "name": "MALW_IotReaper.yar",
+        "size": 401,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_IotReaper.yar"
+      },
+      {
+        "name": "MALW_Jolob_Backdoor.yar",
+        "size": 1127,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Jolob_Backdoor.yar"
+      },
+      {
+        "name": "MALW_Kelihos.yar",
+        "size": 996,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Kelihos.yar"
+      },
+      {
+        "name": "MALW_KeyBase.yar",
+        "size": 698,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_KeyBase.yar"
+      },
+      {
+        "name": "MALW_KINS.yar",
+        "size": 1709,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_KINS.yar"
+      },
+      {
+        "name": "MALW_kirbi_mimikatz.yar",
+        "size": 374,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_kirbi_mimikatz.yar"
+      },
+      {
+        "name": "MALW_Korlia.yar",
+        "size": 1754,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Korlia.yar"
+      },
+      {
+        "name": "MALW_Korplug.yar",
+        "size": 1714,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Korplug.yar"
+      },
+      {
+        "name": "MALW_Kovter.yar",
+        "size": 1067,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Kovter.yar"
+      },
+      {
+        "name": "MALW_kpot.yar",
+        "size": 1197,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_kpot.yar"
+      },
+      {
+        "name": "MALW_Kraken.yar",
+        "size": 802,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Kraken.yar"
+      },
+      {
+        "name": "MALW_Kwampirs.yar",
+        "size": 2589,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Kwampirs.yar"
+      },
+      {
+        "name": "MALW_Lateral_Movement.yar",
+        "size": 780,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Lateral_Movement.yar"
+      },
+      {
+        "name": "MALW_Lenovo_Superfish.yar",
+        "size": 1103,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Lenovo_Superfish.yar"
+      },
+      {
+        "name": "MALW_LinuxBew.yar",
+        "size": 379,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_LinuxBew.yar"
+      },
+      {
+        "name": "MALW_LinuxHelios.yar",
+        "size": 389,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_LinuxHelios.yar"
+      },
+      {
+        "name": "MALW_LinuxMoose.yar",
+        "size": 2863,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_LinuxMoose.yar"
+      },
+      {
+        "name": "MALW_LostDoor.yar",
+        "size": 411,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_LostDoor.yar"
+      },
+      {
+        "name": "MALW_LuaBot.yar",
+        "size": 703,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_LuaBot.yar"
+      },
+      {
+        "name": "MALW_LuckyCat.yar",
+        "size": 652,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_LuckyCat.yar"
+      },
+      {
+        "name": "MALW_LURK0.yar",
+        "size": 1934,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_LURK0.yar"
+      },
+      {
+        "name": "MALW_MacControl.yar",
+        "size": 1552,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_MacControl.yar"
+      },
+      {
+        "name": "MALW_MacGyver.yar",
+        "size": 2689,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_MacGyver.yar"
+      },
+      {
+        "name": "MALW_Madness.yar",
+        "size": 999,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Madness.yar"
+      },
+      {
+        "name": "MALW_Magento_backend.yar",
+        "size": 8774,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Magento_backend.yar"
+      },
+      {
+        "name": "MALW_Magento_frontend.yar",
+        "size": 3648,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Magento_frontend.yar"
+      },
+      {
+        "name": "MALW_Magento_suspicious.yar",
+        "size": 2264,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Magento_suspicious.yar"
+      },
+      {
+        "name": "MALW_Mailers.yar",
+        "size": 1127,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Mailers.yar"
+      },
+      {
+        "name": "MALW_marap.yar",
+        "size": 1189,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_marap.yar"
+      },
+      {
+        "name": "MALW_MedusaHTTP_2019.yar",
+        "size": 1018,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_MedusaHTTP_2019.yar"
+      },
+      {
+        "name": "MALW_Miancha.yar",
+        "size": 2135,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Miancha.yar"
+      },
+      {
+        "name": "MALW_MiniAsp3_mem.yar",
+        "size": 581,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_MiniAsp3_mem.yar"
+      },
+      {
+        "name": "MALW_Mirai_Okiru_ELF.yar",
+        "size": 828,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Mirai_Okiru_ELF.yar"
+      },
+      {
+        "name": "MALW_Mirai_Satori_ELF.yar",
+        "size": 1052,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Mirai_Satori_ELF.yar"
+      },
+      {
+        "name": "MALW_Mirai.yar",
+        "size": 9082,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Mirai.yar"
+      },
+      {
+        "name": "MALW_Miscelanea_Linux.yar",
+        "size": 4417,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Miscelanea_Linux.yar"
+      },
+      {
+        "name": "MALW_Miscelanea.yar",
+        "size": 20658,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Miscelanea.yar"
+      },
+      {
+        "name": "MALW_Monero_Miner_installer.yar",
+        "size": 821,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Monero_Miner_installer.yar"
+      },
+      {
+        "name": "MALW_MSILStealer.yar",
+        "size": 918,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_MSILStealer.yar"
+      },
+      {
+        "name": "MALW_Naikon.yar",
+        "size": 2497,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Naikon.yar"
+      },
+      {
+        "name": "MALW_Naspyupdate.yar",
+        "size": 1113,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Naspyupdate.yar"
+      },
+      {
+        "name": "MALW_NetTraveler.yar",
+        "size": 2254,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_NetTraveler.yar"
+      },
+      {
+        "name": "MALW_NionSpy.yar",
+        "size": 681,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_NionSpy.yar"
+      },
+      {
+        "name": "MALW_Notepad.yar",
+        "size": 528,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Notepad.yar"
+      },
+      {
+        "name": "MALW_NSFree.yar",
+        "size": 1172,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_NSFree.yar"
+      },
+      {
+        "name": "MALW_Odinaff.yar",
+        "size": 900,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Odinaff.yar"
+      },
+      {
+        "name": "MALW_Olyx.yar",
+        "size": 1021,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Olyx.yar"
+      },
+      {
+        "name": "MALW_OSX_Leverage.yar",
+        "size": 904,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_OSX_Leverage.yar"
+      },
+      {
+        "name": "MALW_PE_sections.yar",
+        "size": 2957,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_PE_sections.yar"
+      },
+      {
+        "name": "MALW_PittyTiger.yar",
+        "size": 1050,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_PittyTiger.yar"
+      },
+      {
+        "name": "MALW_PolishBankRat.yar",
+        "size": 1720,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_PolishBankRat.yar"
+      },
+      {
+        "name": "MALW_Ponmocup.yar",
+        "size": 4034,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Ponmocup.yar"
+      },
+      {
+        "name": "MALW_Pony.yar",
+        "size": 786,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Pony.yar"
+      },
+      {
+        "name": "MALW_Predator.yar",
+        "size": 765,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Predator.yar"
+      },
+      {
+        "name": "MALW_PubSab.yar",
+        "size": 1000,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_PubSab.yar"
+      },
+      {
+        "name": "MALW_PurpleWave.yar",
+        "size": 2856,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_PurpleWave.yar"
+      },
+      {
+        "name": "MALW_Pyinstaller_OSX.yar",
+        "size": 484,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Pyinstaller_OSX.yar"
+      },
+      {
+        "name": "MALW_Pyinstaller.yar",
+        "size": 533,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Pyinstaller.yar"
+      },
+      {
+        "name": "MALW_PyPI.yar",
+        "size": 322,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_PyPI.yar"
+      },
+      {
+        "name": "MALW_Quarian.yar",
+        "size": 2166,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Quarian.yar"
+      },
+      {
+        "name": "MALW_Rebirth_Vulcan_ELF.yar",
+        "size": 2793,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Rebirth_Vulcan_ELF.yar"
+      },
+      {
+        "name": "MALW_Regsubdat.yar",
+        "size": 1278,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Regsubdat.yar"
+      },
+      {
+        "name": "MALW_Rockloader.yar",
+        "size": 847,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Rockloader.yar"
+      },
+      {
+        "name": "MALW_Rooter.yar",
+        "size": 2154,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Rooter.yar"
+      },
+      {
+        "name": "MALW_Rovnix.yar",
+        "size": 609,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Rovnix.yar"
+      },
+      {
+        "name": "MALW_Safenet.yar",
+        "size": 1123,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Safenet.yar"
+      },
+      {
+        "name": "MALW_Sakurel.yar",
+        "size": 814,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Sakurel.yar"
+      },
+      {
+        "name": "MALW_Sayad.yar",
+        "size": 2040,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Sayad.yar"
+      },
+      {
+        "name": "MALW_Scarhikn.yar",
+        "size": 1143,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Scarhikn.yar"
+      },
+      {
+        "name": "MALW_Sendsafe.yar",
+        "size": 1778,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Sendsafe.yar"
+      },
+      {
+        "name": "MALW_Shamoon.yar",
+        "size": 4028,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Shamoon.yar"
+      },
+      {
+        "name": "MALW_shifu_shiz.yar",
+        "size": 2248,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_shifu_shiz.yar"
+      },
+      {
+        "name": "MALW_Shifu.yar",
+        "size": 3260,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Shifu.yar"
+      },
+      {
+        "name": "MALW_sitrof_fortis_scar.yar",
+        "size": 649,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_sitrof_fortis_scar.yar"
+      },
+      {
+        "name": "MALW_Skeleton.yar",
+        "size": 2240,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Skeleton.yar"
+      },
+      {
+        "name": "MALW_Spora.yar",
+        "size": 1103,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Spora.yar"
+      },
+      {
+        "name": "MALW_Sqlite.yar",
+        "size": 499,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Sqlite.yar"
+      },
+      {
+        "name": "MALW_Stealer.yar",
+        "size": 661,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Stealer.yar"
+      },
+      {
+        "name": "MALW_Surtr.yar",
+        "size": 2868,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Surtr.yar"
+      },
+      {
+        "name": "MALW_T5000.yar",
+        "size": 1292,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_T5000.yar"
+      },
+      {
+        "name": "MALW_Tedroo.yar",
+        "size": 429,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Tedroo.yar"
+      },
+      {
+        "name": "MALW_Tinba.yar",
+        "size": 1234,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Tinba.yar"
+      },
+      {
+        "name": "MALW_TinyShell_Backdoor_gen.yar",
+        "size": 3291,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_TinyShell_Backdoor_gen.yar"
+      },
+      {
+        "name": "MALW_Torte_ELF.yar",
+        "size": 1764,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Torte_ELF.yar"
+      },
+      {
+        "name": "MALW_TreasureHunt.yar",
+        "size": 587,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_TreasureHunt.yar"
+      },
+      {
+        "name": "MALW_TrickBot.yar",
+        "size": 1631,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_TrickBot.yar"
+      },
+      {
+        "name": "MALW_TRITON_HATMAN.yar",
+        "size": 3725,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_TRITON_HATMAN.yar"
+      },
+      {
+        "name": "MALW_TRITON_ICS_FRAMEWORK.yar",
+        "size": 2831,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_TRITON_ICS_FRAMEWORK.yar"
+      },
+      {
+        "name": "MALW_Trumpbot.yar",
+        "size": 321,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Trumpbot.yar"
+      },
+      {
+        "name": "MALW_Upatre.yar",
+        "size": 2129,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Upatre.yar"
+      },
+      {
+        "name": "MALW_Urausy.yar",
+        "size": 618,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Urausy.yar"
+      },
+      {
+        "name": "MALW_Vidgrab.yar",
+        "size": 1255,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Vidgrab.yar"
+      },
+      {
+        "name": "MALW_viotto_keylogger.yar",
+        "size": 383,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_viotto_keylogger.yar"
+      },
+      {
+        "name": "MALW_Virut_FileInfector_UNK_VERSION.yar",
+        "size": 629,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Virut_FileInfector_UNK_VERSION.yar"
+      },
+      {
+        "name": "MALW_Volgmer.yar",
+        "size": 231,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Volgmer.yar"
+      },
+      {
+        "name": "MALW_Wabot.yar",
+        "size": 442,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Wabot.yar"
+      },
+      {
+        "name": "MALW_Warp.yar",
+        "size": 995,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Warp.yar"
+      },
+      {
+        "name": "MALW_Wimmie.yar",
+        "size": 1209,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Wimmie.yar"
+      },
+      {
+        "name": "MALW_xDedic_marketplace.yar",
+        "size": 1269,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_xDedic_marketplace.yar"
+      },
+      {
+        "name": "MALW_XHide.yar",
+        "size": 342,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_XHide.yar"
+      },
+      {
+        "name": "MALW_XMRIG_Miner.yar",
+        "size": 166,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_XMRIG_Miner.yar"
+      },
+      {
+        "name": "MALW_XOR_DDos.yar",
+        "size": 507,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_XOR_DDos.yar"
+      },
+      {
+        "name": "MALW_Yayih.yar",
+        "size": 1036,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Yayih.yar"
+      },
+      {
+        "name": "MALW_Yordanyan_ActiveAgent.yar",
+        "size": 1466,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Yordanyan_ActiveAgent.yar"
+      },
+      {
+        "name": "MALW_Zegost.yar",
+        "size": 510,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Zegost.yar"
+      },
+      {
+        "name": "MALW_Zeus.yar",
+        "size": 1015,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/MALW_Zeus.yar"
+      },
+      {
+        "name": "POS_Bernhard.yar",
+        "size": 1389,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/POS_Bernhard.yar"
+      },
+      {
+        "name": "POS_BruteforcingBot.yar",
+        "size": 625,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/POS_BruteforcingBot.yar"
+      },
+      {
+        "name": "POS_Easterjack.yar",
+        "size": 524,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/POS_Easterjack.yar"
+      },
+      {
+        "name": "POS_FastPOS.yar",
+        "size": 695,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/POS_FastPOS.yar"
+      },
+      {
+        "name": "POS_LogPOS.yar",
+        "size": 816,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/POS_LogPOS.yar"
+      },
+      {
+        "name": "POS_MalumPOS.yar",
+        "size": 726,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/POS_MalumPOS.yar"
+      },
+      {
+        "name": "POS_Mozart.yar",
+        "size": 1511,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/POS_Mozart.yar"
+      },
+      {
+        "name": "POS.yar",
+        "size": 9362,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/POS.yar"
+      },
+      {
+        "name": "RANSOM_.CRYPTXXX.yar",
+        "size": 2799,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_.CRYPTXXX.yar"
+      },
+      {
+        "name": "RANSOM_777.yar",
+        "size": 1036,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_777.yar"
+      },
+      {
+        "name": "RANSOM_acroware.yar",
+        "size": 961,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_acroware.yar"
+      },
+      {
+        "name": "RANSOM_Alpha.yar",
+        "size": 747,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Alpha.yar"
+      },
+      {
+        "name": "RANSOM_BadRabbit.yar",
+        "size": 1920,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_BadRabbit.yar"
+      },
+      {
+        "name": "RANSOM_Cerber.yar",
+        "size": 1362,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Cerber.yar"
+      },
+      {
+        "name": "RANSOM_Comodosec.yar",
+        "size": 1703,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Comodosec.yar"
+      },
+      {
+        "name": "RANSOM_Crypren.yar",
+        "size": 495,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Crypren.yar"
+      },
+      {
+        "name": "RANSOM_Cryptolocker.yar",
+        "size": 2588,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Cryptolocker.yar"
+      },
+      {
+        "name": "RANSOM_CryptoNar.yar",
+        "size": 1614,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_CryptoNar.yar"
+      },
+      {
+        "name": "RANSOM_DMALocker.yar",
+        "size": 1054,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_DMALocker.yar"
+      },
+      {
+        "name": "RANSOM_DoublePulsar_Petya.yar",
+        "size": 1684,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_DoublePulsar_Petya.yar"
+      },
+      {
+        "name": "RANSOM_Erebus.yar",
+        "size": 493,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Erebus.yar"
+      },
+      {
+        "name": "RANSOM_GoldenEye.yar",
+        "size": 1321,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_GoldenEye.yar"
+      },
+      {
+        "name": "RANSOM_GPGQwerty.yar",
+        "size": 446,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_GPGQwerty.yar"
+      },
+      {
+        "name": "RANSOM_jeff_dev.yar",
+        "size": 657,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_jeff_dev.yar"
+      },
+      {
+        "name": "RANSOM_locdoor.yar",
+        "size": 1214,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_locdoor.yar"
+      },
+      {
+        "name": "RANSOM_Locky.yar",
+        "size": 1294,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Locky.yar"
+      },
+      {
+        "name": "RANSOM_Maze.yar",
+        "size": 906,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Maze.yar"
+      },
+      {
+        "name": "RANSOM_MS17-010_Wannacrypt.yar",
+        "size": 14792,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_MS17-010_Wannacrypt.yar"
+      },
+      {
+        "name": "RANSOM_PetrWrap.yar",
+        "size": 1150,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_PetrWrap.yar"
+      },
+      {
+        "name": "RANSOM_Petya_MS17_010.yar",
+        "size": 4348,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Petya_MS17_010.yar"
+      },
+      {
+        "name": "RANSOM_Petya.yar",
+        "size": 1497,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Petya.yar"
+      },
+      {
+        "name": "RANSOM_Pico.yar",
+        "size": 1038,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Pico.yar"
+      },
+      {
+        "name": "RANSOM_Revix.yar",
+        "size": 1870,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Revix.yar"
+      },
+      {
+        "name": "RANSOM_SamSam.yar",
+        "size": 5055,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_SamSam.yar"
+      },
+      {
+        "name": "RANSOM_Satana.yar",
+        "size": 1134,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Satana.yar"
+      },
+      {
+        "name": "RANSOM_screenlocker_5h311_1nj3c706.yar",
+        "size": 1090,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_screenlocker_5h311_1nj3c706.yar"
+      },
+      {
+        "name": "RANSOM_Shiva.yar",
+        "size": 1404,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Shiva.yar"
+      },
+      {
+        "name": "RANSOM_shrug2.yar",
+        "size": 722,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_shrug2.yar"
+      },
+      {
+        "name": "RANSOM_Sigma.yar",
+        "size": 618,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Sigma.yar"
+      },
+      {
+        "name": "RANSOM_Snake.yar",
+        "size": 1631,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Snake.yar"
+      },
+      {
+        "name": "RANSOM_Stampado.yar",
+        "size": 770,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Stampado.yar"
+      },
+      {
+        "name": "RANSOM_termite.yar",
+        "size": 954,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_termite.yar"
+      },
+      {
+        "name": "RANSOM_TeslaCrypt.yar",
+        "size": 455,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_TeslaCrypt.yar"
+      },
+      {
+        "name": "RANSOM_Tox.yar",
+        "size": 7005,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RANSOM_Tox.yar"
+      },
+      {
+        "name": "RAT_Adwind.yar",
+        "size": 2739,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Adwind.yar"
+      },
+      {
+        "name": "RAT_Adzok.yar",
+        "size": 712,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Adzok.yar"
+      },
+      {
+        "name": "RAT_Asyncrat.yar",
+        "size": 1414,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Asyncrat.yar"
+      },
+      {
+        "name": "RAT_BlackShades.yar",
+        "size": 3709,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_BlackShades.yar"
+      },
+      {
+        "name": "RAT_Bolonyokte.yar",
+        "size": 1474,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Bolonyokte.yar"
+      },
+      {
+        "name": "RAT_Bozok.yar",
+        "size": 554,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Bozok.yar"
+      },
+      {
+        "name": "RAT_Cerberus.yar",
+        "size": 528,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Cerberus.yar"
+      },
+      {
+        "name": "RAT_Crimson.yar",
+        "size": 535,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Crimson.yar"
+      },
+      {
+        "name": "RAT_CrossRAT.yar",
+        "size": 571,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_CrossRAT.yar"
+      },
+      {
+        "name": "RAT_CyberGate.yar",
+        "size": 762,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_CyberGate.yar"
+      },
+      {
+        "name": "RAT_DarkComet.yar",
+        "size": 3595,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_DarkComet.yar"
+      },
+      {
+        "name": "RAT_FlyingKitten.yar",
+        "size": 1410,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_FlyingKitten.yar"
+      },
+      {
+        "name": "RAT_Gh0st.yar",
+        "size": 1746,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Gh0st.yar"
+      },
+      {
+        "name": "RAT_Gholee.yar",
+        "size": 3142,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Gholee.yar"
+      },
+      {
+        "name": "RAT_Glass.yar",
+        "size": 415,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Glass.yar"
+      },
+      {
+        "name": "RAT_Havex.yar",
+        "size": 2691,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Havex.yar"
+      },
+      {
+        "name": "RAT_Hizor.yar",
+        "size": 1291,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Hizor.yar"
+      },
+      {
+        "name": "RAT_Indetectables.yar",
+        "size": 2287,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Indetectables.yar"
+      },
+      {
+        "name": "RAT_Inocnation.yar",
+        "size": 2366,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Inocnation.yar"
+      },
+      {
+        "name": "RAT_jRAT.yar",
+        "size": 620,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_jRAT.yar"
+      },
+      {
+        "name": "RAT_Meterpreter_Reverse_Tcp.yar",
+        "size": 1001,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Meterpreter_Reverse_Tcp.yar"
+      },
+      {
+        "name": "RAT_Nanocore.yar",
+        "size": 2675,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Nanocore.yar"
+      },
+      {
+        "name": "RAT_NetwiredRC.yar",
+        "size": 1089,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_NetwiredRC.yar"
+      },
+      {
+        "name": "RAT_Njrat.yar",
+        "size": 5009,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Njrat.yar"
+      },
+      {
+        "name": "RAT_Orcus.yar",
+        "size": 1696,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Orcus.yar"
+      },
+      {
+        "name": "RAT_PlugX.yar",
+        "size": 2144,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_PlugX.yar"
+      },
+      {
+        "name": "RAT_PoetRATDoc.yar",
+        "size": 704,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_PoetRATDoc.yar"
+      },
+      {
+        "name": "RAT_PoetRATPython.yar",
+        "size": 731,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_PoetRATPython.yar"
+      },
+      {
+        "name": "RAT_PoisonIvy.yar",
+        "size": 1985,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_PoisonIvy.yar"
+      },
+      {
+        "name": "RAT_Ratdecoders.yar",
+        "size": 15414,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Ratdecoders.yar"
+      },
+      {
+        "name": "RAT_Sakula.yar",
+        "size": 2835,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Sakula.yar"
+      },
+      {
+        "name": "RAT_ShadowTech.yar",
+        "size": 966,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_ShadowTech.yar"
+      },
+      {
+        "name": "RAT_Shim.yar",
+        "size": 1641,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Shim.yar"
+      },
+      {
+        "name": "RAT_Terminator.yar",
+        "size": 1009,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Terminator.yar"
+      },
+      {
+        "name": "RAT_xRAT.yar",
+        "size": 827,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_xRAT.yar"
+      },
+      {
+        "name": "RAT_xRAT20.yar",
+        "size": 1375,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_xRAT20.yar"
+      },
+      {
+        "name": "RAT_Xtreme.yar",
+        "size": 3442,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_Xtreme.yar"
+      },
+      {
+        "name": "RAT_ZoxPNG.yar",
+        "size": 656,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/RAT_ZoxPNG.yar"
+      },
+      {
+        "name": "TOOLKIT_Chinese_Hacktools.yar",
+        "size": 81578,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Chinese_Hacktools.yar"
+      },
+      {
+        "name": "TOOLKIT_Dubrute.yar",
+        "size": 629,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Dubrute.yar"
+      },
+      {
+        "name": "TOOLKIT_exe2hex_payload.yar",
+        "size": 838,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_exe2hex_payload.yar"
+      },
+      {
+        "name": "TOOLKIT_FinFisher_.yar",
+        "size": 6093,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_FinFisher_.yar"
+      },
+      {
+        "name": "TOOLKIT_Gen_powerkatz.yar",
+        "size": 1330,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Gen_powerkatz.yar"
+      },
+      {
+        "name": "TOOLKIT_Mandibule.yar",
+        "size": 2423,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Mandibule.yar"
+      },
+      {
+        "name": "TOOLKIT_PassTheHash.yar",
+        "size": 7934,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_PassTheHash.yar"
+      },
+      {
+        "name": "TOOLKIT_Powerstager.yar",
+        "size": 1620,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Powerstager.yar"
+      },
+      {
+        "name": "TOOLKIT_Pwdump.yar",
+        "size": 1112,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Pwdump.yar"
+      },
+      {
+        "name": "TOOLKIT_Redteam_Tools_by_GUID.yar",
+        "size": 141505,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Redteam_Tools_by_GUID.yar"
+      },
+      {
+        "name": "TOOLKIT_Redteam_Tools_by_Name.yar",
+        "size": 26300,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Redteam_Tools_by_Name.yar"
+      },
+      {
+        "name": "TOOLKIT_Solarwinds_credential_stealer.yar",
+        "size": 1632,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Solarwinds_credential_stealer.yar"
+      },
+      {
+        "name": "TOOLKIT_THOR_HackTools.yar",
+        "size": 95720,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_THOR_HackTools.yar"
+      },
+      {
+        "name": "TOOLKIT_Wineggdrop.yar",
+        "size": 743,
+        "path": "/test_rules/yara-rules-extracted/rules-master/malware/TOOLKIT_Wineggdrop.yar"
+      }
+    ],
+    "deprecated": [
+      {
+        "name": "bank_rule.yar",
+        "size": 283,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/bank_rule.yar"
+      }
+    ],
+    "webshells": [
+      {
+        "name": "WShell_APT_Laudanum.yar",
+        "size": 13085,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/WShell_APT_Laudanum.yar"
+      },
+      {
+        "name": "WShell_ASPXSpy.yar",
+        "size": 625,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/WShell_ASPXSpy.yar"
+      },
+      {
+        "name": "WShell_ChinaChopper.yar",
+        "size": 1279,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/WShell_ChinaChopper.yar"
+      },
+      {
+        "name": "Wshell_ChineseSpam.yar",
+        "size": 1077,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/Wshell_ChineseSpam.yar"
+      },
+      {
+        "name": "WShell_Drupalgeddon2_icos.yar",
+        "size": 918,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/WShell_Drupalgeddon2_icos.yar"
+      },
+      {
+        "name": "Wshell_fire2013.yar",
+        "size": 843,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/Wshell_fire2013.yar"
+      },
+      {
+        "name": "WShell_PHP_Anuna.yar",
+        "size": 700,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/WShell_PHP_Anuna.yar"
+      },
+      {
+        "name": "WShell_PHP_in_images.yar",
+        "size": 536,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/WShell_PHP_in_images.yar"
+      },
+      {
+        "name": "WShell_THOR_Webshells.yar",
+        "size": 306810,
+        "path": "/test_rules/yara-rules-extracted/rules-master/webshells/WShell_THOR_Webshells.yar"
+      }
+    ],
+    "maldocs": [
+      {
+        "name": "Maldoc_APT_OLE_JSRat.yar",
+        "size": 554,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_APT_OLE_JSRat.yar"
+      },
+      {
+        "name": "Maldoc_APT10_MenuPass.yar",
+        "size": 1001,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_APT10_MenuPass.yar"
+      },
+      {
+        "name": "Maldoc_APT19_CVE-2017-0199.yar",
+        "size": 4500,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_APT19_CVE-2017-0199.yar"
+      },
+      {
+        "name": "Maldoc_Contains_VBE_File.yar",
+        "size": 721,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_Contains_VBE_File.yar"
+      },
+      {
+        "name": "Maldoc_CVE_2017_11882.yar",
+        "size": 690,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_CVE_2017_11882.yar"
+      },
+      {
+        "name": "Maldoc_CVE_2017_8759.yar",
+        "size": 3710,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_CVE_2017_8759.yar"
+      },
+      {
+        "name": "Maldoc_CVE-2017-0199.yar",
+        "size": 570,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_CVE-2017-0199.yar"
+      },
+      {
+        "name": "Maldoc_DDE.yar",
+        "size": 867,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_DDE.yar"
+      },
+      {
+        "name": "Maldoc_Dridex.yar",
+        "size": 3107,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_Dridex.yar"
+      },
+      {
+        "name": "Maldoc_hancitor_dropper.yar",
+        "size": 931,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_hancitor_dropper.yar"
+      },
+      {
+        "name": "Maldoc_Hidden_PE_file.yar",
+        "size": 1022,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_Hidden_PE_file.yar"
+      },
+      {
+        "name": "Maldoc_malrtf_ole2link.yar",
+        "size": 1088,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_malrtf_ole2link.yar"
+      },
+      {
+        "name": "Maldoc_MIME_ActiveMime_b64.yar",
+        "size": 731,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_MIME_ActiveMime_b64.yar"
+      },
+      {
+        "name": "Maldoc_PDF.yar",
+        "size": 12084,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_PDF.yar"
+      },
+      {
+        "name": "Maldoc_PowerPointMouse.yar",
+        "size": 582,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_PowerPointMouse.yar"
+      },
+      {
+        "name": "maldoc_somerules.yar",
+        "size": 8234,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/maldoc_somerules.yar"
+      },
+      {
+        "name": "Maldoc_Suspicious_OLE_target.yar",
+        "size": 696,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_Suspicious_OLE_target.yar"
+      },
+      {
+        "name": "Maldoc_UserForm.yar",
+        "size": 583,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_UserForm.yar"
+      },
+      {
+        "name": "Maldoc_VBA_macro_code.yar",
+        "size": 747,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_VBA_macro_code.yar"
+      },
+      {
+        "name": "Maldoc_Word_2007_XML_Flat_OPC.yar",
+        "size": 1439,
+        "path": "/test_rules/yara-rules-extracted/rules-master/maldocs/Maldoc_Word_2007_XML_Flat_OPC.yar"
+      }
+    ],
+    "utils": [
+      {
+        "name": "base64.yar",
+        "size": 530,
+        "path": "/test_rules/yara-rules-extracted/rules-master/utils/base64.yar"
+      },
+      {
+        "name": "domain.yar",
+        "size": 363,
+        "path": "/test_rules/yara-rules-extracted/rules-master/utils/domain.yar"
+      },
+      {
+        "name": "ip.yar",
+        "size": 1055,
+        "path": "/test_rules/yara-rules-extracted/rules-master/utils/ip.yar"
+      },
+      {
+        "name": "magic.yar",
+        "size": 372,
+        "path": "/test_rules/yara-rules-extracted/rules-master/utils/magic.yar"
+      },
+      {
+        "name": "suspicious_strings.yar",
+        "size": 69887,
+        "path": "/test_rules/yara-rules-extracted/rules-master/utils/suspicious_strings.yar"
+      },
+      {
+        "name": "url.yar",
+        "size": 378,
+        "path": "/test_rules/yara-rules-extracted/rules-master/utils/url.yar"
+      },
+      {
+        "name": "virustotal.yar",
+        "size": 1890,
+        "path": "/test_rules/yara-rules-extracted/rules-master/utils/virustotal.yar"
+      }
+    ],
+    "email": [
+      {
+        "name": "attachment.yar",
+        "size": 1025,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/attachment.yar"
+      },
+      {
+        "name": "EMAIL_Cryptowall.yar",
+        "size": 1412,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/EMAIL_Cryptowall.yar"
+      },
+      {
+        "name": "Email_fake_it_maintenance_bulletin.yar",
+        "size": 1398,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/Email_fake_it_maintenance_bulletin.yar"
+      },
+      {
+        "name": "Email_generic_phishing.yar",
+        "size": 1002,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/Email_generic_phishing.yar"
+      },
+      {
+        "name": "Email_PHP_Mailer.yar",
+        "size": 3362,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/Email_PHP_Mailer.yar"
+      },
+      {
+        "name": "Email_quota_limit_warning.yar",
+        "size": 1396,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/Email_quota_limit_warning.yar"
+      },
+      {
+        "name": "email_Ukraine_BE_powerattack.yar",
+        "size": 1325,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/email_Ukraine_BE_powerattack.yar"
+      },
+      {
+        "name": "extortion_email.yar",
+        "size": 1433,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/extortion_email.yar"
+      },
+      {
+        "name": "image.yar",
+        "size": 1126,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/image.yar"
+      },
+      {
+        "name": "scam.yar",
+        "size": 1175,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/scam.yar"
+      },
+      {
+        "name": "urls.yar",
+        "size": 1027,
+        "path": "/test_rules/yara-rules-extracted/rules-master/email/urls.yar"
+      }
+    ],
+    "Android": [
+      {
+        "name": "Android_adware.yar",
+        "size": 622,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_adware.yar"
+      },
+      {
+        "name": "Android_AliPay_smsStealer.yar",
+        "size": 1248,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_AliPay_smsStealer.yar"
+      },
+      {
+        "name": "Android_Amtrckr_20160519.yar",
+        "size": 23210,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Amtrckr_20160519.yar"
+      },
+      {
+        "name": "Android_ASSDdeveloper.yar",
+        "size": 792,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_ASSDdeveloper.yar"
+      },
+      {
+        "name": "Android_AVITOMMS.yar",
+        "size": 1049,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_AVITOMMS.yar"
+      },
+      {
+        "name": "Android_Backdoor_script.yar",
+        "size": 719,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Backdoor_script.yar"
+      },
+      {
+        "name": "Android_Backdoor.yar",
+        "size": 946,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Backdoor.yar"
+      },
+      {
+        "name": "Android_BadMirror.yar",
+        "size": 815,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_BadMirror.yar"
+      },
+      {
+        "name": "Android_Banker_Acecard.yar",
+        "size": 969,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Banker_Acecard.yar"
+      },
+      {
+        "name": "Android_BatteryBot_ClickFraud.yar",
+        "size": 869,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_BatteryBot_ClickFraud.yar"
+      },
+      {
+        "name": "Android_Clicker_G.yar",
+        "size": 557,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Clicker_G.yar"
+      },
+      {
+        "name": "Android_Copy9.yar",
+        "size": 305,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Copy9.yar"
+      },
+      {
+        "name": "Android_DeathRing.yar",
+        "size": 606,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_DeathRing.yar"
+      },
+      {
+        "name": "Android_Dectus_rswm.yar",
+        "size": 1425,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Dectus_rswm.yar"
+      },
+      {
+        "name": "Android_Dendroid_RAT.yar",
+        "size": 1407,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Dendroid_RAT.yar"
+      },
+      {
+        "name": "Android_Dogspectus.yar",
+        "size": 715,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Dogspectus.yar"
+      },
+      {
+        "name": "Android_FakeApps.yar",
+        "size": 3347,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_FakeApps.yar"
+      },
+      {
+        "name": "Android_FakeBank_Fanta.yar",
+        "size": 679,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_FakeBank_Fanta.yar"
+      },
+      {
+        "name": "Android_Finspy.yar",
+        "size": 708,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Finspy.yar"
+      },
+      {
+        "name": "Android_generic_adware.yar",
+        "size": 751,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_generic_adware.yar"
+      },
+      {
+        "name": "Android_generic_smsfraud.yar",
+        "size": 1256,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_generic_smsfraud.yar"
+      },
+      {
+        "name": "Android_Godless.yar",
+        "size": 1251,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Godless.yar"
+      },
+      {
+        "name": "Android_HackintTeam_Implant.yar",
+        "size": 2931,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_HackintTeam_Implant.yar"
+      },
+      {
+        "name": "Android_Libyan_Scorpions.yar",
+        "size": 1643,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Libyan_Scorpions.yar"
+      },
+      {
+        "name": "Android_malware_Advertising.yar",
+        "size": 630,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_malware_Advertising.yar"
+      },
+      {
+        "name": "Android_malware_banker.yar",
+        "size": 1200,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_malware_banker.yar"
+      },
+      {
+        "name": "Android_malware_ChinesePorn.yar",
+        "size": 2288,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_malware_ChinesePorn.yar"
+      },
+      {
+        "name": "Android_malware_Dropper.yar",
+        "size": 618,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_malware_Dropper.yar"
+      },
+      {
+        "name": "Android_malware_Fake_MosKow.yar",
+        "size": 789,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_malware_Fake_MosKow.yar"
+      },
+      {
+        "name": "Android_malware_HackingTeam.yar",
+        "size": 2359,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_malware_HackingTeam.yar"
+      },
+      {
+        "name": "Android_Malware_Ramsonware.yar",
+        "size": 2370,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Malware_Ramsonware.yar"
+      },
+      {
+        "name": "Android_malware_SMSsender.yar",
+        "size": 3557,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_malware_SMSsender.yar"
+      },
+      {
+        "name": "Android_Malware_Tinhvan.yar",
+        "size": 699,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Malware_Tinhvan.yar"
+      },
+      {
+        "name": "Android_Malware_Towelroot.yar",
+        "size": 2503,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Malware_Towelroot.yar"
+      },
+      {
+        "name": "Android_malware_xbot007.yar",
+        "size": 363,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_malware_xbot007.yar"
+      },
+      {
+        "name": "Android_MalwareCertificates.yar",
+        "size": 1061,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_MalwareCertificates.yar"
+      },
+      {
+        "name": "Android_mapin.yar",
+        "size": 1450,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_mapin.yar"
+      },
+      {
+        "name": "Android_Marcher_2.yar",
+        "size": 1411,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Marcher_2.yar"
+      },
+      {
+        "name": "Android_MazarBot_z.yar",
+        "size": 1415,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_MazarBot_z.yar"
+      },
+      {
+        "name": "Android_Metasploit_Payload.yar",
+        "size": 538,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Metasploit_Payload.yar"
+      },
+      {
+        "name": "Android_Metasploit.yar",
+        "size": 1078,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Metasploit.yar"
+      },
+      {
+        "name": "Android_OmniRat.yar",
+        "size": 770,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_OmniRat.yar"
+      },
+      {
+        "name": "Android_Overlayer.yar",
+        "size": 941,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Overlayer.yar"
+      },
+      {
+        "name": "Android_Pink_Locker.yar",
+        "size": 1225,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Pink_Locker.yar"
+      },
+      {
+        "name": "Android_Polish_Bankbot.yar",
+        "size": 1526,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Polish_Bankbot.yar"
+      },
+      {
+        "name": "Android_pornClicker.yar",
+        "size": 885,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_pornClicker.yar"
+      },
+      {
+        "name": "Android_RuMMS.yar",
+        "size": 1338,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_RuMMS.yar"
+      },
+      {
+        "name": "Android_SandroRat.yar",
+        "size": 333,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_SandroRat.yar"
+      },
+      {
+        "name": "Android_sk_bankTr.yar",
+        "size": 1269,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_sk_bankTr.yar"
+      },
+      {
+        "name": "Android_SlemBunk.yar",
+        "size": 675,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_SlemBunk.yar"
+      },
+      {
+        "name": "Android_SMSFraud.yar",
+        "size": 1256,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_SMSFraud.yar"
+      },
+      {
+        "name": "Android_SpyAgent.yar",
+        "size": 1346,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_SpyAgent.yar"
+      },
+      {
+        "name": "Android_Spynet.yar",
+        "size": 657,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Spynet.yar"
+      },
+      {
+        "name": "Android_SpyNote.yar",
+        "size": 1164,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_SpyNote.yar"
+      },
+      {
+        "name": "Android_Spywaller.yar",
+        "size": 1072,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Spywaller.yar"
+      },
+      {
+        "name": "Android_Switcher.yar",
+        "size": 1269,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Switcher.yar"
+      },
+      {
+        "name": "Android_Tachi.yar",
+        "size": 780,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Tachi.yar"
+      },
+      {
+        "name": "Android_Tempting_Cedar_Spyware.yar",
+        "size": 406,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Tempting_Cedar_Spyware.yar"
+      },
+      {
+        "name": "Android_Tordow.yar",
+        "size": 1215,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Tordow.yar"
+      },
+      {
+        "name": "Android_Triada_Banking.yar",
+        "size": 1104,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Triada_Banking.yar"
+      },
+      {
+        "name": "Android_Trojan_Dendroid.yar",
+        "size": 666,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Trojan_Dendroid.yar"
+      },
+      {
+        "name": "Android_Trojan_Droidjack.yar",
+        "size": 593,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_Trojan_Droidjack.yar"
+      },
+      {
+        "name": "Android_VikingOrder.yar",
+        "size": 660,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_VikingOrder.yar"
+      },
+      {
+        "name": "Android_VirusPolicia.yar",
+        "size": 1246,
+        "path": "/test_rules/yara-rules-extracted/rules-master/deprecated/Android/Android_VirusPolicia.yar"
+      }
+    ]
+  },
+  "total_rules": 523,
+  "source": "YARA-Rules (Official) - GitHub"
+}
