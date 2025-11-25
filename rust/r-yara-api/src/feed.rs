@@ -12,17 +12,21 @@ use std::sync::Arc;
 use tokio::sync::RwLock;
 use r_yara_feed_scanner::{DiscoveredRule, FeedScanner};
 
+/// Request for feed scanning operations
 #[derive(Deserialize)]
-struct ScanRequest {
-    output: Option<String>,
+pub(crate) struct ScanRequest {
+    /// Optional output path for saving results
+    #[allow(dead_code)]
+    pub output: Option<String>,
 }
 
+/// Response from feed scanning operations
 #[derive(Serialize)]
-struct ScanResponse {
-    success: bool,
-    rules: Vec<DiscoveredRule>,
-    rule_count: usize,
-    use_case: String,
+pub(crate) struct ScanResponse {
+    pub success: bool,
+    pub rules: Vec<DiscoveredRule>,
+    pub rule_count: usize,
+    pub use_case: String,
 }
 
 use crate::AppState;

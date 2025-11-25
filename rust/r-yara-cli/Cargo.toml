@@ -10,7 +10,6 @@ path = "src/main.rs"
 
 [dependencies]
 r-yara-store = { path = "../r-yara-store" }
-r-yara-api = { path = "../r-yara-api" }
 r-yara-feed-scanner = { path = "../r-yara-feed-scanner" }
 clap = { version = "4.0", features = ["derive"] }
 tokio = { version = "1.0", features = ["full"] }

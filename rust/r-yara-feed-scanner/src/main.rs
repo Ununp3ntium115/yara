@@ -1,14 +1,14 @@
-/// YARA Feed Scanner CLI
+/// R-YARA Feed Scanner CLI
 /// Scans web feeds for latest YARA rules
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use yara_feed_scanner::{DiscoveredRule, FeedScanner, YaraRuleSource};
+use r_yara_feed_scanner::{DiscoveredRule, FeedScanner};
 use std::fs;
 
 #[derive(Parser)]
-#[command(name = "yara-feed-scanner")]
-#[command(about = "Scan web feeds for latest YARA rules")]
+#[command(name = "r-yara-feed-scanner")]
+#[command(about = "R-YARA - Scan web feeds for latest YARA rules")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,

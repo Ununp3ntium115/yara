@@ -1,0 +1,10 @@
+# R-YARA MCP Server dependencies
+
+# Async support
+asyncio
+
+# JSON handling (stdlib, no install needed)
+# json
+
+# Optional: MCP SDK (when available)
+# mcp>=0.1.0
