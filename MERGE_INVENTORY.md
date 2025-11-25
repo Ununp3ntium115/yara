@@ -246,3 +246,29 @@ rm *_COMPLETE*.md
 | Rust build status | ✅ Compiles |
 
 **Bottom Line:** The core Cryptex system (Rust + standalone MCP + Python scanner) works without Pyro. To merge to main, remove Pyro-specific files and consolidate documentation.
+
+---
+
+## R-YARA Rebranding Plan
+
+The project is being rebranded from "YARA Cryptex" to **R-YARA** (Rust YARA) to:
+- Distinguish from upstream VirusTotal YARA
+- Emphasize Rust-native implementation
+- Enable standalone operation
+
+### Crate Renaming
+
+| Current | Target |
+|---------|--------|
+| cryptex-store | r-yara-store |
+| cryptex-api | r-yara-api |
+| cryptex-cli | r-yara-cli |
+| yara-feed-scanner | r-yara-feed-scanner |
+
+### New Features Planned
+
+1. **Streaming API** - WebSocket/SSE for real-time rule streaming
+2. **Worker Protocol** - Distributed task processing
+3. **Standalone Mode** - Zero Pyro dependencies
+
+See `steering/R_YARA_ROADMAP.md` and `steering/GAP_ANALYSIS.md` for details.
