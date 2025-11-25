@@ -1,12 +1,12 @@
-/// Binary to export Cryptex dictionary from redb to JSON
+/// Binary to export R-YARA dictionary from redb to JSON
 
-use cryptex_store::CryptexStore;
+use r_yara_store::CryptexStore;
 use std::fs;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
-#[structopt(name = "export-cryptex", about = "Export YARA Cryptex dictionary from redb to JSON")]
+#[structopt(name = "r-yara-export", about = "Export R-YARA dictionary from redb to JSON")]
 struct Opt {
     /// Path to redb database file
     #[structopt(short, long, parse(from_os_str), default_value = "cryptex.db")]
@@ -20,7 +20,7 @@ struct Opt {
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
 
-    println!("Exporting YARA Cryptex dictionary...");
+    println!("Exporting R-YARA dictionary...");
     println!("Database: {:?}", opt.database);
     println!("Output: {:?}", opt.output);
 

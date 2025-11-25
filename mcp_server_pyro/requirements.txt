@@ -1,6 +1,0 @@
-# MCP SDK (optional - install if available)
-# mcp>=0.1.0
-
-# Core dependencies
-asyncio
-

@@ -1,7 +1,8 @@
 [package]
-name = "cryptex-store"
+name = "r-yara-store"
 version = "0.1.0"
 edition = "2021"
+description = "R-YARA dictionary and rule storage backend"
 
 [dependencies]
 redb = "1.0"
@@ -14,6 +15,5 @@ chrono = "0.4"
 structopt = "0.3"
 
 [lib]
-name = "cryptex_store"
+name = "r_yara_store"
 path = "src/lib.rs"
-

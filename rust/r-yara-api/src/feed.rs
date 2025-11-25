@@ -1,4 +1,4 @@
-/// YARA Feed Scanner API endpoints
+/// R-YARA Feed Scanner API endpoints
 
 use axum::{
     extract::State,
@@ -10,7 +10,7 @@ use axum::{
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use yara_feed_scanner::{DiscoveredRule, FeedScanner};
+use r_yara_feed_scanner::{DiscoveredRule, FeedScanner};
 
 #[derive(Deserialize)]
 struct ScanRequest {
@@ -126,11 +126,11 @@ pub async fn scan_ransomware(
 /// Create feed scanner router
 pub fn create_router(_scanner: Arc<RwLock<FeedScanner>>) -> Router<AppState> {
     Router::new()
-        .route("/api/v2/yara/feed/scan/all", post(scan_all))
-        .route("/api/v2/yara/feed/scan/new-tasks", post(scan_new_tasks))
-        .route("/api/v2/yara/feed/scan/old-tasks", post(scan_old_tasks))
-        .route("/api/v2/yara/feed/scan/malware", post(scan_malware))
-        .route("/api/v2/yara/feed/scan/apt", post(scan_apt))
-        .route("/api/v2/yara/feed/scan/ransomware", post(scan_ransomware))
+        .route("/api/v2/r-yara/feed/scan/all", post(scan_all))
+        .route("/api/v2/r-yara/feed/scan/new-tasks", post(scan_new_tasks))
+        .route("/api/v2/r-yara/feed/scan/old-tasks", post(scan_old_tasks))
+        .route("/api/v2/r-yara/feed/scan/malware", post(scan_malware))
+        .route("/api/v2/r-yara/feed/scan/apt", post(scan_apt))
+        .route("/api/v2/r-yara/feed/scan/ransomware", post(scan_ransomware))
 }
 

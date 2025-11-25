@@ -1,4 +1,4 @@
-/// YARA Rules Feed Scanner
+/// R-YARA Rules Feed Scanner
 /// Scans web feeds for latest YARA rules and integrates them
 
 use anyhow::Result;

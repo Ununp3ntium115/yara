@@ -1,12 +1,12 @@
-/// Binary to import YARA Cryptex dictionary into redb
+/// Binary to import R-YARA dictionary into redb
 
-use cryptex_store::{CryptexStore, CryptexStoreError};
+use r_yara_store::{CryptexStore, CryptexStoreError};
 use std::fs;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(StructOpt)]
-#[structopt(name = "import-cryptex", about = "Import YARA Cryptex dictionary into redb")]
+#[structopt(name = "r-yara-import", about = "Import R-YARA dictionary into redb")]
 struct Opt {
     /// Path to JSON dictionary file
     #[structopt(short, long, parse(from_os_str))]
@@ -20,7 +20,7 @@ struct Opt {
 fn main() -> Result<(), CryptexStoreError> {
     let opt = Opt::from_args();
 
-    println!("Importing YARA Cryptex dictionary...");
+    println!("Importing R-YARA dictionary...");
     println!("Input: {:?}", opt.input);
     println!("Database: {:?}", opt.database);
 

@@ -1,52 +1,85 @@
-# YARA Cryptex - Rust Implementation
+# R-YARA - Rust YARA Implementation
 
-Rust workspace for YARA Cryptex dictionary and migration.
+Rust workspace for the R-YARA pattern matching system.
 
-## Structure
+## Crates
 
-```
-rust/
-├── cryptex/              # Cryptex dictionary (auto-generated)
-│   ├── Cargo.toml
-│   ├── symbol_map.rs    # Symbol to codename lookup
-│   ├── cryptex_types.rs # Type definitions
-│   ├── modules.rs       # Module structure
-│   └── function_stubs.rs # Function stubs with pseudocode
-├── yara-runner/         # YARA execution wrapper (planned)
-├── mcp-gateway/         # MCP server gateway (planned)
-└── cryptex-store/       # redb-backed storage (planned)
-```
+| Crate | Description | Binary |
+|-------|-------------|--------|
+| `r-yara-store` | Dictionary and rule storage (redb) | `r-yara-import`, `r-yara-export` |
+| `r-yara-api` | REST API server | `r-yara-server` |
+| `r-yara-cli` | Command-line interface | `r-yara` |
+| `r-yara-feed-scanner` | Web feed scanner | `r-yara-feed` |
 
-## Usage
-
-### View Generated Code
+## Quick Start
 
 ```bash
-cd rust/cryptex
-cat symbol_map.rs
-cat cryptex_types.rs
+# Build all crates
+cargo build --release
+
+# Run CLI
+./target/release/r-yara --help
+
+# Start API server
+./target/release/r-yara-server
+
+# Scan feeds
+./target/release/r-yara-feed scan --output rules.json
 ```
 
-### Build (when dependencies are added)
+## API Endpoints
+
+```
+# Dictionary
+GET  /api/v2/r-yara/dictionary/lookup
+GET  /api/v2/r-yara/dictionary/entries
+GET  /api/v2/r-yara/dictionary/search
+GET  /api/v2/r-yara/dictionary/stats
+
+# Feed Scanning
+POST /api/v2/r-yara/feed/scan/all
+POST /api/v2/r-yara/feed/scan/malware
+POST /api/v2/r-yara/feed/scan/apt
+POST /api/v2/r-yara/feed/scan/ransomware
+```
+
+## Features
+
+- **Standalone Operation**: No external dependencies required
+- **Dictionary Storage**: redb-backed for fast lookups
+- **Feed Scanner**: Scans GitHub, RSS, Atom feeds for YARA rules
+- **REST API**: Full HTTP API for integration
+- **CLI**: Complete command-line interface
+
+## Development
 
 ```bash
-cd rust/cryptex
-cargo build
+# Check code
+cargo check
+
+# Run tests
+cargo test
+
+# Format code
+cargo fmt
+
+# Lint
+cargo clippy
 ```
 
-## Migration Strategy
+## Architecture
 
-1. **Phase 1**: Core types and lookup tables (current)
-2. **Phase 2**: Function stubs with pseudocode
-3. **Phase 3**: Implement core scanning functions
-4. **Phase 4**: Module system migration
-5. **Phase 5**: Full feature parity
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────────────┐
+│  r-yara-cli │────▶│ r-yara-api  │────▶│ r-yara-feed-scanner │
+└─────────────┘     └─────────────┘     └─────────────────────┘
+                           │
+                    ┌──────▼──────┐
+                    │ r-yara-store │
+                    │    (redb)    │
+                    └─────────────┘
+```
 
-## Next Steps
+## License
 
-1. Add proper Rust dependencies
-2. Implement core functions based on pseudocode
-3. Create redb schema for dictionary storage
-4. Build MCP gateway in Rust
-5. Create Node-RED integration
-
+Apache-2.0

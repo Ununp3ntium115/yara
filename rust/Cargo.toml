@@ -1,16 +1,16 @@
 [workspace]
 members = [
-    "cryptex-store",
-    "cryptex-api",
-    "yara-feed-scanner",
-    "cryptex-cli",
+    "r-yara-store",
+    "r-yara-api",
+    "r-yara-feed-scanner",
+    "r-yara-cli",
 ]
 resolver = "2"
 
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-authors = ["PYRO Platform"]
+authors = ["R-YARA Project"]
 license = "Apache-2.0"
 
 [workspace.dependencies]
@@ -21,4 +21,3 @@ anyhow = "1.0"
 thiserror = "1.0"
 tokio = { version = "1.0", features = ["full"] }
 chrono = { version = "0.4", features = ["serde"] }
-

@@ -1,14 +1,14 @@
-/// YARA Cryptex CLI - Complete self-sustaining application
-/// Provides command-line interface for all Cryptex operations
+/// R-YARA CLI - Complete self-sustaining application
+/// Provides command-line interface for all R-YARA operations
 
 use clap::{Parser, Subcommand};
-use cryptex_store::CryptexStore;
-use yara_feed_scanner::FeedScanner;
+use r_yara_store::CryptexStore;
+use r_yara_feed_scanner::FeedScanner;
 use std::path::PathBuf;
 
 #[derive(Parser)]
-#[command(name = "cryptex")]
-#[command(about = "YARA Cryptex Dictionary - Complete CLI", version = "0.1.0")]
+#[command(name = "r-yara")]
+#[command(about = "R-YARA - Rust YARA Pattern Matching CLI", version = "0.1.0")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -132,7 +132,7 @@ async fn main() -> anyhow::Result<()> {
                 }
                 DictCommands::Stats => {
                     let stats = store.get_statistics()?;
-                    println!("Cryptex Dictionary Statistics:");
+                    println!("R-YARA Dictionary Statistics:");
                     println!("  Total entries: {}", stats.total_entries);
                     println!("  Functions: {}", stats.functions);
                     println!("  CLI tools: {}", stats.cli_tools);
@@ -172,10 +172,10 @@ async fn main() -> anyhow::Result<()> {
             }
         }
         Commands::Server { port, host } => {
-            println!("Starting Cryptex API server on {}:{}", host, port);
+            println!("Starting R-YARA API server on {}:{}", host, port);
             println!("Press Ctrl+C to stop");
-            
-            // Start server (would use cryptex-api here)
+
+            // Start server (would use r-yara-api here)
             tokio::signal::ctrl_c().await?;
             println!("\nShutting down...");
         }

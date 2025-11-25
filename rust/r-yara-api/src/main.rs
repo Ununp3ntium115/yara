@@ -1,5 +1,5 @@
-/// YARA Cryptex Dictionary API Server
-/// Provides REST API for Cryptex dictionary access
+/// R-YARA API Server
+/// Provides REST API for R-YARA dictionary and rule operations
 
 mod feed;
 
@@ -10,11 +10,11 @@ use axum::{
     routing::get,
     Router,
 };
-use cryptex_store::{CryptexEntry, CryptexStore};
+use r_yara_store::{CryptexEntry, CryptexStore};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use yara_feed_scanner::FeedScanner;
+use r_yara_feed_scanner::FeedScanner;
 
 #[derive(Deserialize)]
 struct LookupParams {
@@ -101,7 +101,7 @@ async fn search_entries(
 /// Get statistics
 async fn get_stats(
     axum::extract::State(state): axum::extract::State<AppState>,
-) -> Result<Json<ApiResponse<cryptex_store::CryptexStatistics>>, StatusCode> {
+) -> Result<Json<ApiResponse<r_yara_store::CryptexStatistics>>, StatusCode> {
     let store = state.store.read().await;
     let stats = store.get_statistics().map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
 
@@ -130,18 +130,18 @@ async fn main() {
         scanner: feed_scanner.clone(),
     };
 
-    // Build router
+    // Build router with R-YARA endpoints
     let app = Router::new()
-        .route("/api/v2/yara/cryptex/lookup", get(lookup_entry))
-        .route("/api/v2/yara/cryptex/entries", get(get_all_entries))
-        .route("/api/v2/yara/cryptex/search", get(search_entries))
-        .route("/api/v2/yara/cryptex/stats", get(get_stats))
+        .route("/api/v2/r-yara/dictionary/lookup", get(lookup_entry))
+        .route("/api/v2/r-yara/dictionary/entries", get(get_all_entries))
+        .route("/api/v2/r-yara/dictionary/search", get(search_entries))
+        .route("/api/v2/r-yara/dictionary/stats", get(get_stats))
         .merge(feed::create_router(feed_scanner))
         .with_state(app_state);
 
     // Start server
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3006").await.unwrap();
-    println!("Cryptex API server listening on http://0.0.0.0:3006");
+    println!("R-YARA API server listening on http://0.0.0.0:3006");
     
     axum::serve(listener, app).await.unwrap();
 }

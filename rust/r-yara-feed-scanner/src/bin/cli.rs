@@ -1,14 +1,14 @@
-/// Enhanced CLI for YARA Feed Scanner with better output formatting
+/// Enhanced CLI for R-YARA Feed Scanner with better output formatting
 
 use anyhow::Result;
 use clap::{Parser, Subcommand};
-use yara_feed_scanner::{DiscoveredRule, FeedScanner};
+use r_yara_feed_scanner::{DiscoveredRule, FeedScanner};
 use std::fs;
 use std::io::Write;
 
 #[derive(Parser)]
-#[command(name = "yara-feed-scanner")]
-#[command(about = "Scan web feeds for latest YARA rules", version = "0.1.0")]
+#[command(name = "r-yara-feed")]
+#[command(about = "R-YARA - Scan web feeds for latest YARA rules", version = "0.1.0")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
