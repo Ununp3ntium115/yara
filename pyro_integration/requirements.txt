@@ -1,0 +1,17 @@
+# R-YARA PYRO Integration dependencies
+
+# Core async support (stdlib, no install needed)
+# asyncio
+
+# Optional: HTTP client for API calls
+aiohttp>=3.8.0
+
+# Optional: WebSocket support
+websockets>=10.0
+
+# Optional: Web frameworks for API integration
+# fastapi>=0.100.0
+# flask>=2.0.0
+
+# Optional: Data validation
+# pydantic>=2.0.0

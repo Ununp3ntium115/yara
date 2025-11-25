@@ -1,0 +1,75 @@
+[package]
+name = "r-yara-pyro"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "R-YARA PYRO Platform Integration - Workers, API Gateway, and Endpoints"
+repository = "https://github.com/Ununp3ntium115/yara"
+keywords = ["yara", "malware", "security", "pyro", "integration"]
+categories = ["command-line-utilities", "development-tools"]
+
+[lib]
+name = "r_yara_pyro"
+path = "src/lib.rs"
+
+[[bin]]
+name = "r-yara-pyro"
+path = "src/main.rs"
+
+[dependencies]
+# Async runtime
+tokio.workspace = true
+futures = "0.3"
+async-trait.workspace = true
+
+# Web framework
+axum.workspace = true
+tower.workspace = true
+tower-http.workspace = true
+
+# Serialization
+serde.workspace = true
+serde_json.workspace = true
+
+# WebSocket
+tokio-tungstenite = "0.24"
+
+# HTTP client
+reqwest.workspace = true
+
+# Logging
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+# Error handling
+thiserror.workspace = true
+anyhow.workspace = true
+
+# UUID generation
+uuid.workspace = true
+
+# Time
+chrono.workspace = true
+
+# CLI
+clap.workspace = true
+
+# Pattern matching
+regex.workspace = true
+
+# Random
+rand.workspace = true
+
+# Base64
+base64.workspace = true
+
+# Internal dependencies
+r-yara-store = { path = "../r-yara-store" }
+
+[dev-dependencies]
+tokio-test = "0.4"
+
+[features]
+default = []
+full = []
