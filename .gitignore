@@ -91,3 +91,7 @@ windows/*/packages/
 .vscode/
 
 tests/mapper
+
+# Rust build artifacts
+rust/target/
+*.rs.bk
