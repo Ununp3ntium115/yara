@@ -1,0 +1,32 @@
+[package]
+name = "r-yara-vm"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "R-YARA Virtual Machine - Executes compiled YARA bytecode"
+repository = "https://github.com/Ununp3ntium115/yara"
+keywords = ["yara", "vm", "bytecode", "malware", "security"]
+categories = ["compilers", "development-tools"]
+
+[lib]
+name = "r_yara_vm"
+path = "src/lib.rs"
+
+[dependencies]
+# Compiler integration
+r-yara-compiler = { path = "../r-yara-compiler" }
+
+# Matcher integration
+r-yara-matcher = { path = "../r-yara-matcher" }
+
+# Error handling
+thiserror.workspace = true
+
+# Utilities
+smol_str = "0.2"
+regex = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = "1.4"
+r-yara-parser = { path = "../r-yara-parser" }

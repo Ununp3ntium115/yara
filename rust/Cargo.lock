@@ -1785,6 +1785,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "r-yara-vm"
+version = "0.1.0"
+dependencies = [
+ "pretty_assertions",
+ "r-yara-compiler",
+ "r-yara-matcher",
+ "r-yara-parser",
+ "regex",
+ "smol_str",
+ "thiserror",
+]
+
+[[package]]
 name = "rand"
 version = "0.8.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
