@@ -89,7 +89,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Initialize logging
     let log_level = if cli.verbose { Level::DEBUG } else { Level::INFO };
-    let subscriber = FmtSubscriber::builder()
+    FmtSubscriber::builder()
         .with_max_level(log_level)
         .with_target(false)
         .init();
@@ -162,9 +162,9 @@ async fn run_server(
 }
 
 async fn run_worker(
-    config: RYaraConfig,
+    _config: RYaraConfig,
     worker_type: String,
-    id: Option<String>,
+    _id: Option<String>,
     connect: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     info!("Starting R-YARA {} worker", worker_type);

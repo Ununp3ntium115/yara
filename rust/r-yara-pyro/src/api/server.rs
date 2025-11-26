@@ -1,10 +1,6 @@
 //! API Server implementation
 
-use axum::{
-    routing::{get, post},
-    Router,
-    Extension,
-};
+use axum::{routing::{get, post}, Extension, Router};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -16,7 +12,6 @@ use crate::config::RYaraConfig;
 use crate::workers::{ScannerWorker, TranscoderWorker};
 
 use super::handlers;
-use super::routes;
 
 /// Shared application state
 pub struct AppState {
@@ -115,7 +110,7 @@ impl ApiServer {
         info!("R-YARA API server starting on {}", addr);
 
         let listener = tokio::net::TcpListener::bind(addr).await?;
-        axum::serve(listener, router)
+        let _ = axum::serve(listener, router)
             .with_graceful_shutdown(shutdown_signal)
             .await;
 

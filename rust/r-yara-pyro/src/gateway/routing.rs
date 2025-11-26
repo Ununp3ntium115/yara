@@ -1,10 +1,11 @@
 //! Request routing and load balancing
 
+#![allow(dead_code)]
+
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use tracing::debug;
 
 /// Load balancing strategy
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]

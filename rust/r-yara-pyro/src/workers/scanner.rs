@@ -2,16 +2,10 @@
 //!
 //! Handles YARA rule scanning, validation, and compilation tasks.
 
-use std::collections::HashMap;
 use std::path::PathBuf;
-use std::process::Stdio;
-use std::sync::Arc;
 use std::time::Instant;
-use tokio::io::AsyncWriteExt;
 use tokio::process::Command;
-use tokio::sync::RwLock;
 
-use crate::config::RYaraConfig;
 use crate::protocol::{TaskResult, TaskType, WorkerTask};
 
 use super::base::{BaseWorker, WorkerState, WorkerStats};

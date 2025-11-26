@@ -2,7 +2,6 @@
 
 use axum::{
     extract::{Extension, Path, Query},
-    http::StatusCode,
     Json,
 };
 use serde::{Deserialize, Serialize};
@@ -318,7 +317,7 @@ pub struct SubmitTaskRequest {
 /// Submit task endpoint
 pub async fn submit_task(
     Extension(_state): Extension<Arc<RwLock<AppState>>>,
-    Json(request): Json<SubmitTaskRequest>,
+    Json(_request): Json<SubmitTaskRequest>,
 ) -> Json<serde_json::Value> {
     let task_id = uuid::Uuid::new_v4().to_string();
 

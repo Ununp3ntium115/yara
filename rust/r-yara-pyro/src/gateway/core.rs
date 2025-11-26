@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::RwLock;
-use tracing::{info, warn, error};
+use tracing::{info, warn};
 
 use crate::config::RYaraConfig;
 use crate::workers::{ScannerWorker, TranscoderWorker};
@@ -72,6 +72,7 @@ impl GatewayStats {
 
 /// R-YARA API Gateway
 pub struct Gateway {
+    #[allow(dead_code)]
     config: Arc<RYaraConfig>,
     services: Arc<RwLock<HashMap<String, ServiceEndpoint>>>,
     stats: Arc<RwLock<GatewayStats>>,

@@ -8,7 +8,6 @@ use std::time::Instant;
 use tokio::sync::RwLock;
 use regex::Regex;
 
-use crate::config::RYaraConfig;
 use crate::protocol::{TaskResult, TaskType, WorkerTask};
 
 use super::base::{BaseWorker, WorkerState, WorkerStats};
