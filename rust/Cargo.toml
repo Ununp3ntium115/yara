@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "r-yara-parser",
+    "r-yara-matcher",
     "r-yara-store",
     "r-yara-api",
     "r-yara-feed-scanner",

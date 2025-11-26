@@ -1,0 +1,35 @@
+[package]
+name = "r-yara-matcher"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "R-YARA Pattern Matching Engine - High-performance Aho-Corasick based pattern matching"
+repository = "https://github.com/Ununp3ntium115/yara"
+keywords = ["yara", "pattern-matching", "aho-corasick", "malware", "security"]
+categories = ["text-processing", "development-tools"]
+
+[lib]
+name = "r_yara_matcher"
+path = "src/lib.rs"
+
+[dependencies]
+# Pattern matching (Aho-Corasick using double-array trie)
+daachorse = "1.0"
+
+# Regular expressions
+regex = { workspace = true }
+
+# Parser integration
+r-yara-parser = { path = "../r-yara-parser" }
+
+# Error handling
+thiserror.workspace = true
+
+# Utilities
+smol_str = "0.2"
+base64 = { workspace = true }
+
+[dev-dependencies]
+pretty_assertions = "1.4"
+rand = { workspace = true }

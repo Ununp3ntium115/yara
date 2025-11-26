@@ -484,6 +484,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "daachorse"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63b7ef7a4be509357f4804d0a22e830daddb48f19fd604e4ad32ddce04a94c36"
+
+[[package]]
 name = "darling"
 version = "0.20.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1686,6 +1692,20 @@ dependencies = [
  "serde_json",
  "tokio",
  "url",
+]
+
+[[package]]
+name = "r-yara-matcher"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "daachorse",
+ "pretty_assertions",
+ "r-yara-parser",
+ "rand",
+ "regex",
+ "smol_str",
+ "thiserror",
 ]
 
 [[package]]
