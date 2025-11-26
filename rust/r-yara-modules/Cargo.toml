@@ -1,0 +1,31 @@
+[package]
+name = "r-yara-modules"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "YARA module implementations for R-YARA"
+documentation = "https://docs.rs/r-yara-modules"
+repository = "https://github.com/VirusTotal/yara"
+keywords = ["yara", "malware", "security", "modules"]
+categories = ["parsing", "encoding"]
+
+[dependencies]
+# Hashing
+md5 = "0.8"
+sha1 = "0.10"
+sha2 = { version = "0.10", features = ["asm"] }
+sha3 = "0.10"
+crc32fast = "1.3"
+
+# Encoding
+hex = "0.4"
+
+# Error handling
+thiserror = "1.0"
+
+# Small strings
+smol_str = "0.2"
+
+[dev-dependencies]
+rand = "0.8"

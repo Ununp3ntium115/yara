@@ -1345,6 +1345,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "md5"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ae960838283323069879657ca3de837e9f7bbb4c7bf6ea7f1b290d5e9476d2e0"
+
+[[package]]
 name = "memchr"
 version = "2.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1716,6 +1722,21 @@ dependencies = [
  "r-yara-parser",
  "rand",
  "regex",
+ "smol_str",
+ "thiserror",
+]
+
+[[package]]
+name = "r-yara-modules"
+version = "0.1.0"
+dependencies = [
+ "crc32fast",
+ "hex",
+ "md5",
+ "rand",
+ "sha1",
+ "sha2",
+ "sha3",
  "smol_str",
  "thiserror",
 ]
@@ -2177,6 +2198,16 @@ dependencies = [
  "cfg-if",
  "cpufeatures",
  "digest",
+ "sha2-asm",
+]
+
+[[package]]
+name = "sha2-asm"
+version = "0.6.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b845214d6175804686b2bd482bcffe96651bb2d1200742b712003504a2dac1ab"
+dependencies = [
+ "cc",
 ]
 
 [[package]]
