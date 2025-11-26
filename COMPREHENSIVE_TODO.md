@@ -31,11 +31,14 @@
 | Native YARA Parser | P0 | 3,000 | ✅ Complete |
 | Native Pattern Engine | P0 | 5,000 | ✅ Complete |
 | Bytecode VM | P0 | 2,000 | ✅ Complete |
-| Hash Module | P1 | 500 | Not Started |
-| Math Module | P1 | 500 | Not Started |
-| PE Module | P1 | 2,500 | Not Started |
-| ELF Module | P1 | 1,500 | Not Started |
+| Hash Module | P1 | 500 | ✅ Complete |
+| Math Module | P1 | 500 | ✅ Complete |
+| PE Module | P1 | 2,500 | ✅ Complete |
+| ELF Module | P1 | 1,500 | ✅ Complete |
+| Console/Time Modules | P1 | 200 | ✅ Complete |
 | Dotnet Module | P1 | 2,000 | Not Started |
+| Macho Module | P2 | 1,000 | ✅ Complete |
+| DEX Module | P2 | 800 | ✅ Complete |
 | Memory Scanner | P1 | 2,000 | Not Started |
 | Endpoint Agent | P1 | 3,000 | Not Started |
 | Container Scanner | P2 | 1,500 | Not Started |
@@ -279,20 +282,52 @@ rust/r-yara-modules/src/math.rs  (~400 lines)
 - [x] log_int(format, value)
 - [x] log_str(format, value)
 
-### 2.5 Future Modules
+### 2.5 Macho Module ✅
 
-- [ ] Macho module (macOS)
-  - [ ] Mach-O header parsing
-  - [ ] Load commands
-  - [ ] Segments and sections
-  - [ ] Symbols
-  - [ ] Code signatures
-- [ ] DEX module (Android)
-  - [ ] DEX header parsing
-  - [ ] String IDs
-  - [ ] Type IDs
-  - [ ] Method IDs
-  - [ ] Class definitions
+```
+rust/r-yara-modules/src/macho.rs  (~750 lines)
+```
+
+**Status: COMPLETE** (via goblin crate)
+
+- [x] Macho module implementation
+  - [x] Mach-O header parsing (32/64-bit, fat binary support)
+  - [x] CPU type and subtype detection
+  - [x] File type detection (execute, dylib, bundle, kext, etc.)
+  - [x] Load commands parsing
+  - [x] Segments and sections enumeration
+  - [x] Symbol table parsing
+  - [x] Library dependencies
+- [x] Helper functions (is_macho, is_64bit, is_fat, is_executable, is_dylib)
+- [x] Security checks (PIE, stack execution, heap execution)
+- [x] Tests (16 test cases)
+
+**Future enhancements:**
+- [ ] Code signature verification
+- [ ] Entitlements parsing
+
+### 2.6 DEX Module ✅
+
+```
+rust/r-yara-modules/src/dex.rs  (~500 lines)
+```
+
+**Status: COMPLETE** (native implementation)
+
+- [x] DEX module implementation
+  - [x] DEX header parsing (magic, version, checksum, signature)
+  - [x] String table extraction with ULEB128 decoding
+  - [x] File structure analysis
+- [x] Helper functions (is_dex, version, number_of_strings, number_of_classes)
+- [x] Access flags constants
+- [x] Tests (13 test cases)
+
+**Future enhancements:**
+- [ ] Full class definition parsing
+- [ ] Method and field enumeration
+- [ ] Type ID parsing
+
+### 2.7 Future Modules
 - [ ] Magic module (optional)
   - [ ] File type detection
   - [ ] libmagic integration
@@ -779,9 +814,12 @@ rust/r-yara-gen/
 
 ### Current Progress
 
-- **Implemented:** ~5,600 lines (13%)
-- **Remaining:** ~37,400 lines (87%)
-- **Estimated time:** 6-12 months for full implementation
+- **Implemented:** ~9,680 lines (~40%)
+  - Core Engine (parser, matcher, compiler, vm): ~4,350 lines
+  - Modules (pe, elf, macho, dex, hash, math, console, time): ~3,680 lines
+  - Existing crates (store, api, cli, feed-scanner, pyro): ~1,650 lines
+- **Remaining:** ~14,320 lines (60%)
+- **Next Priority:** Dotnet module, Memory Scanner, Endpoint Agent
 
 ---
 

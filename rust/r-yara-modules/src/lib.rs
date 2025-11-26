@@ -29,8 +29,10 @@
 //! ```
 
 pub mod console;
+pub mod dex;
 pub mod elf;
 pub mod hash;
+pub mod macho;
 pub mod math;
 pub mod pe;
 pub mod time;
