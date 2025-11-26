@@ -278,4 +278,7 @@ cd rust && cargo build --release --workspace
 
 ### Future Enhancements
 
-See `steering/R_YARA_ROADMAP.md` and `steering/GAP_ANALYSIS.md` for roadmap details.
+See the following documents for roadmap and future development:
+- `TODO_FEATURES.md` - **Comprehensive feature roadmap with priorities**
+- `steering/R_YARA_ROADMAP.md` - Architecture and implementation plan
+- `steering/GAP_ANALYSIS.md` - Gap analysis vs upstream YARA
