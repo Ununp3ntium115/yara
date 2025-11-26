@@ -249,14 +249,32 @@ The project has been rebranded from "YARA Cryptex" to **R-YARA** (Rust YARA):
 
 ### Release: v0.1.0-beta
 
-**Release binaries (Linux x86_64):**
-| Binary | Size |
-|--------|------|
-| r-yara | 7.2 MB |
-| r-yara-pyro | 11.1 MB |
-| r-yara-server | 8.3 MB |
-| r-yara-feed-scanner | 6.2 MB |
-| r-yara-feed | 6.3 MB |
+**Release package:** `releases/v0.1.0-beta/`
+
+**Release binaries (Linux x86_64, stripped):**
+| Binary | Size | Description |
+|--------|------|-------------|
+| r-yara | 5.4 MB | CLI tool for dictionary operations |
+| r-yara-server | 6.1 MB | REST API server (axum-based) |
+| r-yara-feed | 4.6 MB | Feed scanner CLI |
+| r-yara-feed-scanner | 4.6 MB | Web feed scanner |
+| r-yara-pyro | 8.1 MB | PYRO Platform integration |
+
+**Release archive:** `r-yara-v0.1.0-beta-linux-x86_64.tar.gz` (12 MB)
+
+**Checksums:** SHA256 checksums included in `SHA256SUMS` and `.sha256` files
+
+**Building for other platforms:**
+```bash
+# Clone and build from source
+cd rust && cargo build --release --workspace
+
+# Supported targets (install with rustup target add):
+# - x86_64-apple-darwin (macOS Intel)
+# - aarch64-apple-darwin (macOS Apple Silicon)
+# - x86_64-pc-windows-msvc (Windows 64-bit)
+# - aarch64-unknown-linux-gnu (Linux ARM64)
+```
 
 ### Future Enhancements
 
