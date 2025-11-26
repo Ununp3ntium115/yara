@@ -1677,6 +1677,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "r-yara-compiler"
+version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "pretty_assertions",
+ "r-yara-matcher",
+ "r-yara-parser",
+ "smol_str",
+ "thiserror",
+]
+
+[[package]]
 name = "r-yara-feed-scanner"
 version = "0.1.0"
 dependencies = [

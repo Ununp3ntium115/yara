@@ -2,6 +2,7 @@
 members = [
     "r-yara-parser",
     "r-yara-matcher",
+    "r-yara-compiler",
     "r-yara-store",
     "r-yara-api",
     "r-yara-feed-scanner",
