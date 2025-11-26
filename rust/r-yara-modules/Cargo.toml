@@ -21,6 +21,9 @@ crc32fast = "1.3"
 # Encoding
 hex = "0.4"
 
+# Binary parsing
+goblin = "0.8"
+
 # Error handling
 thiserror = "1.0"
 

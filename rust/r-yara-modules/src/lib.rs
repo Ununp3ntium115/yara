@@ -5,6 +5,8 @@
 //!
 //! # Available Modules
 //!
+//! - **pe**: PE (Windows executable) file analysis
+//! - **elf**: ELF (Linux executable) file analysis
 //! - **hash**: Cryptographic hash functions (md5, sha1, sha256, etc.)
 //! - **math**: Mathematical and statistical functions (entropy, mean, etc.)
 //! - **time**: Time-related functions
@@ -26,10 +28,12 @@
 //! println!("Entropy: {:.2}", entropy);
 //! ```
 
+pub mod console;
+pub mod elf;
 pub mod hash;
 pub mod math;
+pub mod pe;
 pub mod time;
-pub mod console;
 
 /// Module error types
 #[derive(Debug, Clone, thiserror::Error)]
