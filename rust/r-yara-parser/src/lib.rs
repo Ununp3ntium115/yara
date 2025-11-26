@@ -5,12 +5,12 @@
 //! This crate provides:
 //! - **Lexer**: Tokenizes YARA rules using Logos for efficient lexical analysis
 //! - **AST**: Abstract Syntax Tree definitions for YARA rules
-//! - **Parser**: (Coming soon) Full YARA rule parser using LALRPOP
+//! - **Parser**: Hand-written recursive descent parser for full YARA syntax
 //!
 //! # Example
 //!
 //! ```
-//! use r_yara_parser::lexer::{Lexer, Token};
+//! use r_yara_parser::parse;
 //!
 //! let source = r#"
 //!     rule example {
@@ -21,12 +21,14 @@
 //!     }
 //! "#;
 //!
-//! let lexer = Lexer::new(source);
-//! for result in lexer {
-//!     match result {
-//!         Ok(spanned) => println!("{:?}", spanned.token),
-//!         Err(e) => eprintln!("Error: {}", e),
+//! match parse(source) {
+//!     Ok(ast) => {
+//!         println!("Parsed {} rules", ast.rules.len());
+//!         for rule in &ast.rules {
+//!             println!("  - {}", rule.name);
+//!         }
 //!     }
+//!     Err(e) => eprintln!("Parse error: {}", e),
 //! }
 //! ```
 //!
@@ -36,8 +38,7 @@
 //!
 //! 1. **Lexer** (`lexer.rs`): Uses Logos for zero-copy tokenization
 //! 2. **AST** (`ast.rs`): Type-safe representation of YARA rules
-//! 3. **Parser** (planned): LALRPOP-based grammar for full parsing
-//! 4. **Errors** (planned): Rich error messages with source locations
+//! 3. **Parser** (`parser.rs`): Hand-written recursive descent parser
 //!
 //! # Performance Goals
 //!
@@ -48,67 +49,23 @@
 
 pub mod ast;
 pub mod lexer;
+pub mod parser;
 
-// Re-export commonly used types
+// Re-export commonly used types from AST
 pub use ast::{
-    BinaryExpr, BinaryOp, Expression, ForExpr, ForIterable, ForIterator, HexString, HexToken,
-    Identifier, Import, Include, MetaEntry, MetaValue, OfExpr, Quantifier, QuantifierKind,
-    RangeExpr, RegexModifiers, RegexString, Rule, RuleModifiers, SourceFile, StringDeclaration,
-    StringModifiers, StringPattern, StringSet, TextString, UnaryExpr, UnaryOp,
+    AtExpr, Base64Modifier, BinaryExpr, BinaryOp, Expression, FieldAccess, ForExpr, ForIterable,
+    ForIterator, FunctionCall, HexString, HexToken, Identifier, Import, Include, IndexExpr, InExpr,
+    MatchesExpr, MetaEntry, MetaValue, OfExpr, Quantifier, QuantifierKind, RangeExpr,
+    RegexModifiers, RegexString, Rule, RuleModifiers, SourceFile, StringCountExpr,
+    StringDeclaration, StringLengthExpr, StringModifiers, StringOffsetExpr, StringPattern,
+    StringSet, TextString, UnaryExpr, UnaryOp, XorModifier,
 };
 
+// Re-export lexer types
 pub use lexer::{Lexer, LexerError, NumberValue, Span, SpannedToken, Token};
 
-/// Parse a YARA source file into an AST.
-///
-/// This is the main entry point for parsing YARA rules.
-///
-/// # Arguments
-///
-/// * `source` - The YARA source code to parse
-///
-/// # Returns
-///
-/// A `Result` containing either the parsed `SourceFile` or a `ParseError`
-///
-/// # Example
-///
-/// ```ignore
-/// use r_yara_parser::parse;
-///
-/// let source = r#"rule test { condition: true }"#;
-/// let ast = parse(source)?;
-/// println!("Parsed {} rules", ast.rules.len());
-/// ```
-pub fn parse(_source: &str) -> Result<SourceFile, ParseError> {
-    // TODO: Implement full parser with LALRPOP
-    // For now, return an empty source file as placeholder
-    Ok(SourceFile::new())
-}
-
-/// Tokenize YARA source code.
-///
-/// Returns an iterator of tokens with span information.
-///
-/// # Arguments
-///
-/// * `source` - The YARA source code to tokenize
-///
-/// # Example
-///
-/// ```
-/// use r_yara_parser::tokenize;
-///
-/// let source = "rule test { condition: true }";
-/// for result in tokenize(source) {
-///     if let Ok(token) = result {
-///         println!("{:?}", token.token);
-///     }
-/// }
-/// ```
-pub fn tokenize(source: &str) -> Lexer<'_> {
-    Lexer::new(source)
-}
+// Re-export parser functions
+pub use parser::{parse, parse_expression, parse_hex_tokens, parse_regex, Parser};
 
 /// Parser error type
 #[derive(Debug, Clone, thiserror::Error)]
@@ -163,6 +120,30 @@ impl ParseError {
     }
 }
 
+/// Tokenize YARA source code.
+///
+/// Returns an iterator of tokens with span information.
+///
+/// # Arguments
+///
+/// * `source` - The YARA source code to tokenize
+///
+/// # Example
+///
+/// ```
+/// use r_yara_parser::tokenize;
+///
+/// let source = "rule test { condition: true }";
+/// for result in tokenize(source) {
+///     if let Ok(token) = result {
+///         println!("{:?}", token.token);
+///     }
+/// }
+/// ```
+pub fn tokenize(source: &str) -> Lexer<'_> {
+    Lexer::new(source)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -181,22 +162,44 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_placeholder() {
+    fn test_parse_simple() {
         let source = "rule test { condition: true }";
         let result = parse(source);
         assert!(result.is_ok());
+        let ast = result.unwrap();
+        assert_eq!(ast.rules.len(), 1);
+        assert_eq!(ast.rules[0].name.as_str(), "test");
     }
 
     #[test]
-    fn test_complex_rule_tokenization() {
+    fn test_parse_with_imports() {
+        let source = r#"
+            import "pe"
+            import "hash"
+
+            rule test {
+                condition:
+                    pe.is_pe
+            }
+        "#;
+        let result = parse(source);
+        assert!(result.is_ok());
+        let ast = result.unwrap();
+        assert_eq!(ast.imports.len(), 2);
+        assert_eq!(ast.rules.len(), 1);
+    }
+
+    #[test]
+    fn test_parse_full_rule() {
         let source = r#"
             import "pe"
 
-            rule detect_malware : malware {
+            private rule detect_malware : malware suspicious {
                 meta:
                     author = "R-YARA"
                     description = "Detect malware patterns"
                     severity = 5
+                    malicious = true
 
                 strings:
                     $mz = { 4D 5A }
@@ -210,53 +213,90 @@ mod tests {
             }
         "#;
 
-        let tokens: Vec<_> = tokenize(source).collect();
-        let ok_tokens: Vec<_> = tokens.iter().filter(|r| r.is_ok()).collect();
+        let result = parse(source);
+        assert!(result.is_ok(), "Parse failed: {:?}", result.err());
 
-        // Verify key tokens are present
-        assert!(ok_tokens.len() > 20);
+        let ast = result.unwrap();
+        assert_eq!(ast.imports.len(), 1);
+        assert_eq!(ast.rules.len(), 1);
+
+        let rule = &ast.rules[0];
+        assert_eq!(rule.name.as_str(), "detect_malware");
+        assert!(rule.modifiers.is_private);
+        assert_eq!(rule.tags.len(), 2);
+        assert_eq!(rule.meta.len(), 4);
+        assert_eq!(rule.strings.len(), 3);
     }
 
     #[test]
-    fn test_string_modifiers_tokenization() {
-        let source = r#"$a = "test" nocase wide ascii fullword xor base64"#;
-        let tokens: Vec<_> = tokenize(source)
-            .filter_map(|r| r.ok())
-            .map(|st| st.token)
-            .collect();
+    fn test_parse_complex_condition() {
+        let source = r#"
+            rule complex_condition {
+                strings:
+                    $a = "test"
+                    $b = "hello"
+                condition:
+                    ($a or $b) and
+                    #a > 5 and
+                    @a[0] < 1000 and
+                    filesize < 10KB
+            }
+        "#;
 
-        assert!(tokens.contains(&Token::Nocase));
-        assert!(tokens.contains(&Token::Wide));
-        assert!(tokens.contains(&Token::Ascii));
-        assert!(tokens.contains(&Token::Fullword));
-        assert!(tokens.contains(&Token::Xor));
-        assert!(tokens.contains(&Token::Base64));
+        let result = parse(source);
+        assert!(result.is_ok());
     }
 
     #[test]
-    fn test_hex_pattern_tokenization() {
-        let source = r#"$hex = { 4D 5A ?? [4-8] ( 00 | FF ) }"#;
-        let tokens: Vec<_> = tokenize(source)
-            .filter_map(|r| r.ok())
-            .collect();
+    fn test_parse_for_expression() {
+        let source = r#"
+            rule for_test {
+                strings:
+                    $a = "test"
+                condition:
+                    for all i in (0..filesize) : ( @a[i] < 100 )
+            }
+        "#;
 
-        // Should have string identifier, assign, and hex string
-        assert!(tokens.iter().any(|t| matches!(t.token, Token::StringIdentifier(_))));
-        assert!(tokens.iter().any(|t| matches!(t.token, Token::Assign)));
-        assert!(tokens.iter().any(|t| matches!(t.token, Token::HexString(_))));
+        let result = parse(source);
+        assert!(result.is_ok());
     }
 
     #[test]
-    fn test_quantifier_expressions() {
-        let source = "all of them any of ($a*) 2 of ($a, $b, $c)";
-        let tokens: Vec<_> = tokenize(source)
-            .filter_map(|r| r.ok())
-            .map(|st| st.token)
-            .collect();
+    fn test_parse_quantifier_expressions() {
+        let source = r#"
+            rule quantifiers {
+                strings:
+                    $a = "test"
+                    $b = "hello"
+                    $c = "world"
+                condition:
+                    any of them or
+                    all of ($a, $b) or
+                    2 of ($a, $b, $c)
+            }
+        "#;
 
-        assert!(tokens.contains(&Token::All));
-        assert!(tokens.contains(&Token::Any));
-        assert!(tokens.contains(&Token::Of));
-        assert!(tokens.contains(&Token::Them));
+        let result = parse(source);
+        assert!(result.is_ok(), "Parse failed: {:?}", result.err());
+    }
+
+    #[test]
+    fn test_string_modifiers() {
+        let source = r#"
+            rule modifiers {
+                strings:
+                    $a = "test" nocase wide ascii fullword
+                    $b = "xored" xor(0x01-0xff)
+                    $c = "encoded" base64
+                condition:
+                    any of them
+            }
+        "#;
+
+        let result = parse(source);
+        assert!(result.is_ok());
+        let ast = result.unwrap();
+        assert_eq!(ast.rules[0].strings.len(), 3);
     }
 }

@@ -178,6 +178,9 @@ pub enum Token {
     #[token("~")]
     Tilde,
 
+    #[token("?")]
+    Question,
+
     #[token("<<")]
     ShiftLeft,
 
@@ -247,10 +250,8 @@ pub enum Token {
     #[regex(r#""([^"\\]|\\.)*""#, parse_string_literal)]
     StringLiteral(String),
 
-    // Hex strings - must start with whitespace + hex byte/wildcard to distinguish from LBrace
-    // Pattern: { followed by whitespace, then hex content (bytes, wildcards, jumps, alternations)
-    #[regex(r"\{\s+([0-9a-fA-F]{2}|\?\?|\?[0-9a-fA-F]|[0-9a-fA-F]\?)[\s0-9a-fA-F\[\]\(\)\|\?\-]*\}", |lex| lex.slice().to_string())]
-    HexString(String),
+    // Note: Hex strings are parsed contextually in the parser after seeing `= {`
+    // This avoids conflicts between `{` as LBrace and hex string start
 
     // Regular expressions
     #[regex(r"/([^/\\]|\\.)+/[ismx]*", |lex| lex.slice().to_string())]
@@ -562,16 +563,14 @@ mod tests {
     }
 
     #[test]
-    fn test_hex_string() {
-        let tokens = lex("{ 4D 5A ?? [4-8] ( 00 | FF ) }");
-        assert_eq!(tokens.len(), 1);
-        match &tokens[0] {
-            Token::HexString(s) => {
-                assert!(s.contains("4D"));
-                assert!(s.contains("5A"));
-            }
-            _ => panic!("Expected hex string"),
-        }
+    fn test_hex_string_as_braces() {
+        // Hex strings are now parsed contextually in the parser
+        // At the lexer level, we just see braces and hex content as separate tokens
+        let tokens = lex("{ 4D 5A }");
+        // Should see: LBrace, Identifier(4D), Identifier(5A), RBrace
+        // Note: hex values without 0x prefix are lexed as identifiers
+        assert!(tokens.contains(&Token::LBrace));
+        assert!(tokens.contains(&Token::RBrace));
     }
 
     #[test]
