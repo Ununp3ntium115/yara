@@ -12,8 +12,9 @@ This repository is a fork of the original YARA project (VirusTotal/yara) rebrand
 ✅ All Pyro-specific files removed
 ✅ Documentation consolidated (73 redundant files removed)
 ✅ Rust workspace builds with zero warnings
-✅ All 30 tests passing
+✅ All 39 tests passing
 ✅ Python pyro_integration removed (replaced by Rust r-yara-pyro crate)
+✅ v0.1.0-beta release tagged
 
 ---
 
@@ -35,7 +36,7 @@ This repository is a fork of the original YARA project (VirusTotal/yara) rebrand
 | `rust/r-yara-api` | ✅ Works | REST API server |
 | `rust/r-yara-cli` | ✅ Works | CLI tool for dictionary operations |
 | `rust/r-yara-feed-scanner` | ✅ Works | Web feed scanner for YARA rules |
-| `rust/r-yara-pyro` | ✅ Works | PYRO Platform integration (29 tests) |
+| `rust/r-yara-pyro` | ✅ Works | PYRO Platform integration (38 tests) |
 | `mcp_server/` | ✅ Works | Standalone MCP server |
 | `tools/` | ✅ Works | Python tools (standalone) |
 | `yara_scanner.py` | ✅ Works | Works with yara-python |
@@ -94,8 +95,8 @@ rust/
 
 **Build Status:** ✅ Compiles with ZERO warnings
 
-**Test Status:** ✅ All 30 tests passing
-- r-yara-pyro: 29 tests
+**Test Status:** ✅ All 39 tests passing
+- r-yara-pyro: 38 tests
 - r-yara-store: 1 test
 
 ---
@@ -186,7 +187,7 @@ The following files have been removed:
 - [ ] Build original YARA: `./bootstrap.sh && ./configure && make`
 - [ ] Run YARA tests: `make check`
 - [x] Build Rust workspace: `cd rust && cargo build --workspace` ✅
-- [x] Run Rust tests: `cd rust && cargo test --workspace` ✅ (30 tests pass)
+- [x] Run Rust tests: `cd rust && cargo test --workspace` ✅ (39 tests pass)
 - [ ] Test Python scanner: `python yara_scanner.py --help` (requires yara-python)
 - [x] Test MCP server: `python -c "from mcp_server import server"` ✅
 - [x] Verify no Pyro errors when Pyro not installed ✅
@@ -199,7 +200,7 @@ The following files have been removed:
 |--------|--------|
 | Rust workspace | ✅ 5 crates |
 | Build status | ✅ Zero warnings |
-| Test status | ✅ 30 tests passing |
+| Test status | ✅ 39 tests passing |
 | Pyro dependencies | ✅ None required |
 | Documentation | ✅ Consolidated |
 | MCP server | ✅ Operational |
@@ -233,7 +234,30 @@ The project has been rebranded from "YARA Cryptex" to **R-YARA** (Rust YARA):
 3. ✅ **Standalone Mode** - Zero Pyro dependencies
 4. ✅ **Gateway Routing** - Load balancing and service discovery
 5. ✅ **Streaming Protocol** - WebSocket/SSE definitions ready
+6. ✅ **PYRO Connection** - Full worker connection with retry logic
+7. ✅ **Task Queue** - Async task queue with priority support (max 1000 tasks)
+8. ✅ **Task Status Tracking** - Full lifecycle (queued/running/completed/failed)
+9. ✅ **Dictionary Search** - Full paginated search with field filtering
+10. ✅ **Feed Scanner Integration** - Use case detection (malware/apt/ransomware/webshell)
+11. ✅ **PYRO Signatures** - Comprehensive crypto hashing:
+    - Classical: MD5, SHA1, SHA256, SHA384, SHA512
+    - SHA-3 (Post-Quantum): SHA3-256, SHA3-384, SHA3-512, Keccak256, Keccak512
+    - BLAKE: BLAKE2b-512, BLAKE2s-256, BLAKE3
+    - Legacy: CRC32, Adler32
+    - Fuzzy: ssdeep-like, TLSH-like
+    - Entropy calculation
 
-### Future Enhancements (TODO)
+### Release: v0.1.0-beta
+
+**Release binaries (Linux x86_64):**
+| Binary | Size |
+|--------|------|
+| r-yara | 7.2 MB |
+| r-yara-pyro | 11.1 MB |
+| r-yara-server | 8.3 MB |
+| r-yara-feed-scanner | 6.2 MB |
+| r-yara-feed | 6.3 MB |
+
+### Future Enhancements
 
 See `steering/R_YARA_ROADMAP.md` and `steering/GAP_ANALYSIS.md` for roadmap details.
