@@ -13,9 +13,15 @@ categories = ["parsing", "development-tools"]
 name = "r_yara_parser"
 path = "src/lib.rs"
 
+[build-dependencies]
+lalrpop = "0.21"
+
 [dependencies]
 # Lexer
 logos = "0.14"
+
+# Parser
+lalrpop-util = { version = "0.21", features = ["lexer"] }
 
 # Error handling
 thiserror.workspace = true

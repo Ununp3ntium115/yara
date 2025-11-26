@@ -1,0 +1,623 @@
+// YARA Grammar for LALRPOP
+//
+// This grammar defines the full syntax of YARA rules.
+// It uses the tokens from our Logos-based lexer.
+
+use crate::ast::*;
+use crate::lexer::{Token, NumberValue, Span};
+use crate::parser::{StringMod, parse_hex_tokens, parse_regex};
+use smol_str::SmolStr;
+
+// Define the token type alias
+grammar<'input>;
+
+// External token definitions - these map to our Logos tokens
+extern {
+    type Location = usize;
+    type Error = crate::ParseError;
+
+    enum Token {
+        // Keywords
+        "rule" => Token::Rule,
+        "private" => Token::Private,
+        "global" => Token::Global,
+        "meta" => Token::Meta,
+        "strings" => Token::Strings,
+        "condition" => Token::Condition,
+        "import" => Token::Import,
+        "include" => Token::Include,
+        "true" => Token::True,
+        "false" => Token::False,
+        "not" => Token::Not,
+        "and" => Token::And,
+        "or" => Token::Or,
+        "all" => Token::All,
+        "any" => Token::Any,
+        "none" => Token::None,
+        "of" => Token::Of,
+        "them" => Token::Them,
+        "for" => Token::For,
+        "in" => Token::In,
+        "at" => Token::At,
+        "filesize" => Token::Filesize,
+        "entrypoint" => Token::Entrypoint,
+        "contains" => Token::Contains,
+        "icontains" => Token::IContains,
+        "startswith" => Token::StartsWith,
+        "istartswith" => Token::IStartsWith,
+        "endswith" => Token::EndsWith,
+        "iendswith" => Token::IEndsWith,
+        "iequals" => Token::IEquals,
+        "matches" => Token::Matches,
+        "defined" => Token::Defined,
+
+        // String modifiers
+        "nocase" => Token::Nocase,
+        "wide" => Token::Wide,
+        "ascii" => Token::Ascii,
+        "fullword" => Token::Fullword,
+        "xor" => Token::Xor,
+        "base64" => Token::Base64,
+        "base64wide" => Token::Base64Wide,
+
+        // Operators
+        "=" => Token::Assign,
+        "==" => Token::Equal,
+        "!=" => Token::NotEqual,
+        "<" => Token::LessThan,
+        "<=" => Token::LessEqual,
+        ">" => Token::GreaterThan,
+        ">=" => Token::GreaterEqual,
+        "+" => Token::Plus,
+        "-" => Token::Minus,
+        "*" => Token::Star,
+        "\\" => Token::Backslash,
+        "%" => Token::Percent,
+        "&" => Token::Ampersand,
+        "|" => Token::Pipe,
+        "^" => Token::Caret,
+        "~" => Token::Tilde,
+        "<<" => Token::ShiftLeft,
+        ">>" => Token::ShiftRight,
+        ".." => Token::DotDot,
+        "." => Token::Dot,
+
+        // Delimiters
+        "{" => Token::LBrace,
+        "}" => Token::RBrace,
+        "(" => Token::LParen,
+        ")" => Token::RParen,
+        "[" => Token::LBracket,
+        "]" => Token::RBracket,
+        ":" => Token::Colon,
+        "," => Token::Comma,
+
+        // Literals
+        IDENTIFIER => Token::Identifier(<String>),
+        STRING_ID => Token::StringIdentifier(<String>),
+        STRING_COUNT => Token::StringCount(<String>),
+        STRING_OFFSET => Token::StringOffset(<String>),
+        STRING_LENGTH => Token::StringLength(<String>),
+        NUMBER => Token::Number(<NumberValue>),
+        SIZE_VALUE => Token::SizeValue(<i64>),
+        STRING_LIT => Token::StringLiteral(<String>),
+        HEX_STRING => Token::HexString(<String>),
+        REGEX => Token::Regex(<String>),
+    }
+}
+
+// Entry point: a source file containing imports, includes, and rules
+pub SourceFile: SourceFile = {
+    <imports:Import*> <includes:Include*> <rules:Rule*> => SourceFile {
+        imports,
+        includes,
+        rules,
+    }
+};
+
+// Import statement
+Import: Import = {
+    <l:@L> "import" <name:STRING_LIT> <r:@R> => Import {
+        module_name: SmolStr::new(&name),
+        span: Span::new(l, r),
+    }
+};
+
+// Include statement
+Include: Include = {
+    <l:@L> "include" <path:STRING_LIT> <r:@R> => Include {
+        path: SmolStr::new(&path),
+        span: Span::new(l, r),
+    }
+};
+
+// Rule definition
+Rule: Rule = {
+    <l:@L> <mods:RuleModifiers> "rule" <name:IDENTIFIER> <tags:Tags?> "{"
+        <meta:MetaSection?>
+        <strings:StringsSection?>
+        "condition" ":" <cond:Expression>
+    "}" <r:@R> => Rule {
+        name: SmolStr::new(&name),
+        modifiers: mods,
+        tags: tags.unwrap_or_default(),
+        meta: meta.unwrap_or_default(),
+        strings: strings.unwrap_or_default(),
+        condition: cond,
+        span: Span::new(l, r),
+    }
+};
+
+// Rule modifiers (private, global)
+RuleModifiers: RuleModifiers = {
+    <private:"private"?> <global:"global"?> => RuleModifiers {
+        is_private: private.is_some(),
+        is_global: global.is_some(),
+    },
+    <global:"global"?> <private:"private"?> => RuleModifiers {
+        is_private: private.is_some(),
+        is_global: global.is_some(),
+    },
+};
+
+// Rule tags
+Tags: Vec<SmolStr> = {
+    ":" <tags:(<IDENTIFIER>)+> => tags.into_iter().map(|s| SmolStr::new(&s)).collect()
+};
+
+// Meta section
+MetaSection: Vec<MetaEntry> = {
+    "meta" ":" <entries:MetaEntry+> => entries
+};
+
+MetaEntry: MetaEntry = {
+    <l:@L> <key:IDENTIFIER> "=" <value:MetaValue> <r:@R> => MetaEntry {
+        key: SmolStr::new(&key),
+        value,
+        span: Span::new(l, r),
+    }
+};
+
+MetaValue: MetaValue = {
+    <s:STRING_LIT> => MetaValue::String(SmolStr::new(&s)),
+    <n:Number> => match n {
+        NumberValue::Integer(i) => MetaValue::Integer(i),
+        NumberValue::Float(_) => MetaValue::Integer(0), // Meta doesn't support floats
+    },
+    "true" => MetaValue::Boolean(true),
+    "false" => MetaValue::Boolean(false),
+};
+
+// Strings section
+StringsSection: Vec<StringDeclaration> = {
+    "strings" ":" <decls:StringDeclaration+> => decls
+};
+
+StringDeclaration: StringDeclaration = {
+    <l:@L> <name:STRING_ID> "=" <pattern:StringPattern> <mods:StringModifiers> <r:@R> => StringDeclaration {
+        name: SmolStr::new(&name),
+        pattern,
+        modifiers: mods,
+        span: Span::new(l, r),
+    }
+};
+
+StringPattern: StringPattern = {
+    <l:@L> <s:STRING_LIT> <r:@R> => StringPattern::Text(TextString {
+        value: SmolStr::new(&s),
+        span: Span::new(l, r),
+    }),
+    <l:@L> <h:HEX_STRING> <r:@R> => StringPattern::Hex(HexString {
+        tokens: parse_hex_tokens(&h),
+        span: Span::new(l, r),
+    }),
+    <l:@L> <r_str:REGEX> <r:@R> => {
+        let (pattern, mods) = parse_regex(&r_str);
+        StringPattern::Regex(RegexString {
+            pattern: SmolStr::new(&pattern),
+            modifiers: mods,
+            span: Span::new(l, r),
+        })
+    }
+};
+
+// String modifiers
+StringModifiers: StringModifiers = {
+    <mods:StringModifier*> => {
+        let mut result = StringModifiers::default();
+        for m in mods {
+            match m {
+                StringMod::Nocase => result.nocase = true,
+                StringMod::Wide => result.wide = true,
+                StringMod::Ascii => result.ascii = true,
+                StringMod::Fullword => result.fullword = true,
+                StringMod::Private => result.private = true,
+                StringMod::Xor(range) => result.xor = Some(XorModifier { range }),
+                StringMod::Base64(alphabet, wide) => result.base64 = Some(Base64Modifier { alphabet, wide }),
+            }
+        }
+        result
+    }
+};
+
+StringModifier: StringMod = {
+    "nocase" => StringMod::Nocase,
+    "wide" => StringMod::Wide,
+    "ascii" => StringMod::Ascii,
+    "fullword" => StringMod::Fullword,
+    "private" => StringMod::Private,
+    "xor" => StringMod::Xor(None),
+    "xor" "(" <n:IntegerLiteral> ")" => StringMod::Xor(Some((n as u8, n as u8))),
+    "xor" "(" <lo:IntegerLiteral> "-" <hi:IntegerLiteral> ")" => StringMod::Xor(Some((lo as u8, hi as u8))),
+    "base64" => StringMod::Base64(None, false),
+    "base64" "(" <alphabet:STRING_LIT> ")" => StringMod::Base64(Some(SmolStr::new(&alphabet)), false),
+    "base64wide" => StringMod::Base64(None, true),
+    "base64wide" "(" <alphabet:STRING_LIT> ")" => StringMod::Base64(Some(SmolStr::new(&alphabet)), true),
+};
+
+// Expression hierarchy (from lowest to highest precedence)
+pub Expression: Expression = {
+    OrExpr,
+};
+
+OrExpr: Expression = {
+    <l:@L> <left:OrExpr> "or" <right:AndExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left,
+        op: BinaryOp::Or,
+        right,
+        span: Span::new(l, r),
+    })),
+    AndExpr,
+};
+
+AndExpr: Expression = {
+    <l:@L> <left:AndExpr> "and" <right:NotExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left,
+        op: BinaryOp::And,
+        right,
+        span: Span::new(l, r),
+    })),
+    NotExpr,
+};
+
+NotExpr: Expression = {
+    <l:@L> "not" <expr:NotExpr> <r:@R> => Expression::Unary(Box::new(UnaryExpr {
+        op: UnaryOp::Not,
+        operand: expr,
+        span: Span::new(l, r),
+    })),
+    <l:@L> "defined" <expr:NotExpr> <r:@R> => Expression::Defined(Box::new(expr)),
+    CompareExpr,
+};
+
+CompareExpr: Expression = {
+    <l:@L> <left:CompareExpr> "==" <right:StringOpExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::Equal, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:CompareExpr> "!=" <right:StringOpExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::NotEqual, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:CompareExpr> "<" <right:StringOpExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::LessThan, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:CompareExpr> "<=" <right:StringOpExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::LessEqual, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:CompareExpr> ">" <right:StringOpExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::GreaterThan, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:CompareExpr> ">=" <right:StringOpExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::GreaterEqual, right, span: Span::new(l, r),
+    })),
+    StringOpExpr,
+};
+
+StringOpExpr: Expression = {
+    <l:@L> <left:StringOpExpr> "contains" <right:BitwiseOrExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::Contains, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:StringOpExpr> "icontains" <right:BitwiseOrExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::IContains, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:StringOpExpr> "startswith" <right:BitwiseOrExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::StartsWith, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:StringOpExpr> "istartswith" <right:BitwiseOrExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::IStartsWith, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:StringOpExpr> "endswith" <right:BitwiseOrExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::EndsWith, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:StringOpExpr> "iendswith" <right:BitwiseOrExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::IEndsWith, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:StringOpExpr> "iequals" <right:BitwiseOrExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::IEquals, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:StringOpExpr> "matches" <pattern:REGEX> <r:@R> => {
+        let (pat, mods) = parse_regex(&pattern);
+        Expression::Matches(Box::new(MatchesExpr {
+            expr: left,
+            pattern: RegexString {
+                pattern: SmolStr::new(&pat),
+                modifiers: mods,
+                span: Span::new(l, r),
+            },
+            span: Span::new(l, r),
+        }))
+    },
+    BitwiseOrExpr,
+};
+
+BitwiseOrExpr: Expression = {
+    <l:@L> <left:BitwiseOrExpr> "|" <right:BitwiseXorExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::BitOr, right, span: Span::new(l, r),
+    })),
+    BitwiseXorExpr,
+};
+
+BitwiseXorExpr: Expression = {
+    <l:@L> <left:BitwiseXorExpr> "^" <right:BitwiseAndExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::BitXor, right, span: Span::new(l, r),
+    })),
+    BitwiseAndExpr,
+};
+
+BitwiseAndExpr: Expression = {
+    <l:@L> <left:BitwiseAndExpr> "&" <right:ShiftExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::BitAnd, right, span: Span::new(l, r),
+    })),
+    ShiftExpr,
+};
+
+ShiftExpr: Expression = {
+    <l:@L> <left:ShiftExpr> "<<" <right:AddExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::ShiftLeft, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:ShiftExpr> ">>" <right:AddExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::ShiftRight, right, span: Span::new(l, r),
+    })),
+    AddExpr,
+};
+
+AddExpr: Expression = {
+    <l:@L> <left:AddExpr> "+" <right:MulExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::Add, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:AddExpr> "-" <right:MulExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::Sub, right, span: Span::new(l, r),
+    })),
+    MulExpr,
+};
+
+MulExpr: Expression = {
+    <l:@L> <left:MulExpr> "*" <right:UnaryExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::Mul, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:MulExpr> "\\" <right:UnaryExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::Div, right, span: Span::new(l, r),
+    })),
+    <l:@L> <left:MulExpr> "%" <right:UnaryExpr> <r:@R> => Expression::Binary(Box::new(BinaryExpr {
+        left, op: BinaryOp::Mod, right, span: Span::new(l, r),
+    })),
+    UnaryExpr,
+};
+
+UnaryExpr: Expression = {
+    <l:@L> "-" <expr:UnaryExpr> <r:@R> => Expression::Unary(Box::new(crate::ast::UnaryExpr {
+        op: UnaryOp::Neg,
+        operand: expr,
+        span: Span::new(l, r),
+    })),
+    <l:@L> "~" <expr:UnaryExpr> <r:@R> => Expression::Unary(Box::new(crate::ast::UnaryExpr {
+        op: UnaryOp::BitNot,
+        operand: expr,
+        span: Span::new(l, r),
+    })),
+    PostfixExpr,
+};
+
+PostfixExpr: Expression = {
+    <l:@L> <obj:PostfixExpr> "[" <idx:Expression> "]" <r:@R> => Expression::Index(Box::new(IndexExpr {
+        object: obj,
+        index: idx,
+        span: Span::new(l, r),
+    })),
+    <l:@L> <obj:PostfixExpr> "." <field:IDENTIFIER> <r:@R> => Expression::FieldAccess(Box::new(FieldAccess {
+        object: obj,
+        field: SmolStr::new(&field),
+        span: Span::new(l, r),
+    })),
+    <l:@L> <func:Identifier> "(" <args:CommaSeparated<Expression>> ")" <r:@R> => Expression::FunctionCall(Box::new(FunctionCall {
+        function: func,
+        arguments: args,
+        span: Span::new(l, r),
+    })),
+    PrimaryExpr,
+};
+
+PrimaryExpr: Expression = {
+    // Literals
+    "true" => Expression::Boolean(true),
+    "false" => Expression::Boolean(false),
+    <n:Number> => match n {
+        NumberValue::Integer(i) => Expression::Integer(i),
+        NumberValue::Float(f) => Expression::Float(f),
+    },
+    <s:SIZE_VALUE> => Expression::Integer(s),
+    <s:STRING_LIT> => Expression::String(SmolStr::new(&s)),
+
+    // Special keywords
+    "filesize" => Expression::Filesize,
+    "entrypoint" => Expression::Entrypoint,
+
+    // String references
+    <s:STRING_ID> => Expression::StringRef(SmolStr::new(&s)),
+
+    // String count: #a or #a in (range)
+    <l:@L> <s:STRING_COUNT> <r:@R> => Expression::StringCount(StringCountExpr {
+        name: SmolStr::new(&s),
+        range: None,
+        span: Span::new(l, r),
+    }),
+    <l:@L> <s:STRING_COUNT> "in" "(" <start:Expression> ".." <end:Expression> ")" <r:@R> => Expression::StringCount(StringCountExpr {
+        name: SmolStr::new(&s),
+        range: Some(Box::new(RangeExpr { start, end, span: Span::new(l, r) })),
+        span: Span::new(l, r),
+    }),
+
+    // String offset: @a or @a[n]
+    <l:@L> <s:STRING_OFFSET> <r:@R> => Expression::StringOffset(StringOffsetExpr {
+        name: SmolStr::new(&s),
+        index: None,
+        span: Span::new(l, r),
+    }),
+    <l:@L> <s:STRING_OFFSET> "[" <idx:Expression> "]" <r:@R> => Expression::StringOffset(StringOffsetExpr {
+        name: SmolStr::new(&s),
+        index: Some(Box::new(idx)),
+        span: Span::new(l, r),
+    }),
+
+    // String length: !a or !a[n]
+    <l:@L> <s:STRING_LENGTH> <r:@R> => Expression::StringLength(StringLengthExpr {
+        name: SmolStr::new(&s),
+        index: None,
+        span: Span::new(l, r),
+    }),
+    <l:@L> <s:STRING_LENGTH> "[" <idx:Expression> "]" <r:@R> => Expression::StringLength(StringLengthExpr {
+        name: SmolStr::new(&s),
+        index: Some(Box::new(idx)),
+        span: Span::new(l, r),
+    }),
+
+    // Identifier (possibly qualified)
+    <id:Identifier> => Expression::Identifier(id),
+
+    // Parenthesized expression
+    "(" <e:Expression> ")" => Expression::Paren(Box::new(e)),
+
+    // Range expression: (start..end)
+    <l:@L> "(" <start:Expression> ".." <end:Expression> ")" <r:@R> => Expression::Range(Box::new(RangeExpr {
+        start, end, span: Span::new(l, r),
+    })),
+
+    // Quantifier expressions
+    QuantifierExpr,
+
+    // For expression
+    ForExpr,
+
+    // At expression: $a at offset
+    <l:@L> <s:STRING_ID> "at" <offset:Expression> <r:@R> => Expression::At(Box::new(AtExpr {
+        string: SmolStr::new(&s),
+        offset,
+        span: Span::new(l, r),
+    })),
+
+    // In expression: expr in (range)
+    <l:@L> <s:STRING_ID> "in" "(" <start:Expression> ".." <end:Expression> ")" <r:@R> => Expression::In(Box::new(InExpr {
+        expr: Expression::StringRef(SmolStr::new(&s)),
+        range: RangeExpr { start, end, span: Span::new(l, r) },
+        span: Span::new(l, r),
+    })),
+};
+
+// Quantifier expressions: all of them, any of ($a*), 2 of ($a, $b)
+QuantifierExpr: Expression = {
+    <l:@L> <q:QuantifierKind> "of" <s:StringSet> <r:@R> => Expression::Of(Box::new(OfExpr {
+        count: q,
+        strings: s,
+        at: None,
+        in_range: None,
+        span: Span::new(l, r),
+    })),
+    <l:@L> <q:QuantifierKind> "of" <s:StringSet> "at" <offset:Expression> <r:@R> => Expression::Of(Box::new(OfExpr {
+        count: q,
+        strings: s,
+        at: Some(Box::new(offset)),
+        in_range: None,
+        span: Span::new(l, r),
+    })),
+    <l:@L> <q:QuantifierKind> "of" <s:StringSet> "in" "(" <start:Expression> ".." <end:Expression> ")" <r:@R> => Expression::Of(Box::new(OfExpr {
+        count: q,
+        strings: s,
+        at: None,
+        in_range: Some(RangeExpr { start, end, span: Span::new(l, r) }),
+        span: Span::new(l, r),
+    })),
+};
+
+QuantifierKind: QuantifierKind = {
+    "all" => QuantifierKind::All,
+    "any" => QuantifierKind::Any,
+    "none" => QuantifierKind::None,
+    <n:IntegerLiteral> => QuantifierKind::Count(Box::new(Expression::Integer(n))),
+    <n:IntegerLiteral> "%" => QuantifierKind::Percentage(Box::new(Expression::Integer(n))),
+};
+
+StringSet: StringSet = {
+    "them" => StringSet::Them,
+    "(" <strings:CommaSeparated<STRING_ID>> ")" => StringSet::Explicit(
+        strings.into_iter().map(|s| SmolStr::new(&s)).collect()
+    ),
+    "(" <pattern:STRING_ID> "*" ")" => StringSet::Wildcard(SmolStr::new(&pattern[..pattern.len()])),
+};
+
+// For expressions
+ForExpr: Expression = {
+    <l:@L> "for" <q:QuantifierKind> <vars:ForVariables> "in" <iter:ForIterable> ":" "(" <cond:Expression> ")" <r:@R> => Expression::For(Box::new(crate::ast::ForExpr {
+        quantifier: q,
+        iterator: ForIterator { variables: vars, iterable: iter },
+        condition: cond,
+        span: Span::new(l, r),
+    })),
+};
+
+ForVariables: Vec<SmolStr> = {
+    <id:IDENTIFIER> => vec![SmolStr::new(&id)],
+    "(" <ids:CommaSeparated<IDENTIFIER>> ")" => ids.into_iter().map(|s| SmolStr::new(&s)).collect(),
+};
+
+ForIterable: ForIterable = {
+    "(" <start:Expression> ".." <end:Expression> ")" => ForIterable::Range(RangeExpr {
+        start, end, span: Span::new(0, 0), // We don't track span for inner ranges
+    }),
+    <s:StringSet> => ForIterable::StringSet(s),
+    <id:Identifier> => ForIterable::Identifier(id),
+};
+
+// Helper: Identifier (possibly qualified with dots)
+Identifier: Identifier = {
+    <l:@L> <first:IDENTIFIER> <rest:("." <IDENTIFIER>)*> <r:@R> => {
+        let mut parts = vec![SmolStr::new(&first)];
+        for part in rest {
+            parts.push(SmolStr::new(&part));
+        }
+        Identifier { parts, span: Span::new(l, r) }
+    }
+};
+
+// Helper: Number (integer or float)
+Number: NumberValue = {
+    NUMBER,
+};
+
+// Helper: Integer literal only
+IntegerLiteral: i64 = {
+    <n:NUMBER> => match n {
+        NumberValue::Integer(i) => i,
+        NumberValue::Float(f) => f as i64,
+    },
+    <s:SIZE_VALUE> => s,
+};
+
+// Helper: Comma-separated list
+CommaSeparated<T>: Vec<T> = {
+    <items:(<T> ",")*> <last:T?> => {
+        let mut items = items;
+        if let Some(last) = last {
+            items.push(last);
+        }
+        items
+    }
+};
