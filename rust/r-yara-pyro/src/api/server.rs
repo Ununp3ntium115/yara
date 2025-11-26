@@ -9,6 +9,7 @@ use tower_http::trace::TraceLayer;
 use tracing::info;
 
 use crate::config::RYaraConfig;
+use crate::task_queue::TaskQueue;
 use crate::workers::{ScannerWorker, TranscoderWorker};
 
 use super::handlers;
@@ -18,6 +19,7 @@ pub struct AppState {
     pub config: RYaraConfig,
     pub scanner: ScannerWorker,
     pub transcoder: TranscoderWorker,
+    pub task_queue: TaskQueue,
 }
 
 impl AppState {
@@ -26,6 +28,7 @@ impl AppState {
             config,
             scanner: ScannerWorker::new(),
             transcoder: TranscoderWorker::new(),
+            task_queue: TaskQueue::new(1000), // Max 1000 queued tasks
         }
     }
 }
@@ -73,9 +76,10 @@ impl ApiServer {
             .route("/transcode/decode", post(handlers::transcode_decode))
             // Feed scanning
             .route("/feed/scan/:use_case", post(handlers::scan_feeds))
-            // Worker
+            // Worker / Task queue
             .route("/worker/task", post(handlers::submit_task))
             .route("/worker/task/:task_id", get(handlers::get_task_status))
+            .route("/worker/tasks", get(handlers::list_tasks))
             // Stats
             .route("/stats", get(handlers::get_stats));
 

@@ -64,6 +64,16 @@ rand.workspace = true
 # Base64
 base64.workspace = true
 
+# Cryptographic hashing (PYRO signatures)
+sha2 = "0.10"
+sha3 = "0.10"
+sha1 = "0.10"
+md-5 = "0.10"
+blake2 = "0.10"
+blake3 = "1.5"
+crc32fast = "1.3"
+hex = "0.4"
+
 # Internal dependencies
 r-yara-store = { path = "../r-yara-store" }
 

@@ -162,9 +162,9 @@ async fn run_server(
 }
 
 async fn run_worker(
-    _config: RYaraConfig,
+    config: RYaraConfig,
     worker_type: String,
-    _id: Option<String>,
+    id: Option<String>,
     connect: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     info!("Starting R-YARA {} worker", worker_type);
@@ -172,11 +172,36 @@ async fn run_worker(
     match worker_type.as_str() {
         "scanner" => {
             let worker = ScannerWorker::new();
-            info!("Scanner worker {} started", worker.worker_id());
+            let worker_id = id.unwrap_or_else(|| worker.worker_id().to_string());
+            info!("Scanner worker {} started", worker_id);
 
             if connect {
                 info!("Connecting to PYRO Platform...");
-                // TODO: Implement PYRO Platform connection
+                let capabilities = worker.capabilities();
+                let (pyro_conn, mut task_rx) = r_yara_pyro::pyro_connection::PyroConnectionBuilder::new()
+                    .config(config.clone())
+                    .worker_id(worker_id.clone())
+                    .worker_type("scanner".to_string())
+                    .capabilities(capabilities)
+                    .build()?;
+
+                // Attempt connection
+                if let Err(e) = pyro_conn.connect().await {
+                    tracing::warn!("Failed to connect to PYRO Platform: {} - running standalone", e);
+                } else {
+                    // Spawn connection loop
+                    tokio::spawn(async move {
+                        pyro_conn.run().await;
+                    });
+
+                    // Process incoming tasks
+                    tokio::spawn(async move {
+                        while let Some(task) = task_rx.recv().await {
+                            let result = worker.process_task(task).await;
+                            tracing::debug!("Task completed: {:?}", result.success);
+                        }
+                    });
+                }
             }
 
             // Keep running
@@ -192,11 +217,36 @@ async fn run_worker(
         }
         "transcoder" => {
             let worker = TranscoderWorker::new();
-            info!("Transcoder worker {} started", worker.worker_id());
+            let worker_id = id.unwrap_or_else(|| worker.worker_id().to_string());
+            info!("Transcoder worker {} started", worker_id);
 
             if connect {
                 info!("Connecting to PYRO Platform...");
-                // TODO: Implement PYRO Platform connection
+                let capabilities = worker.capabilities();
+                let (pyro_conn, mut task_rx) = r_yara_pyro::pyro_connection::PyroConnectionBuilder::new()
+                    .config(config.clone())
+                    .worker_id(worker_id.clone())
+                    .worker_type("transcoder".to_string())
+                    .capabilities(capabilities)
+                    .build()?;
+
+                // Attempt connection
+                if let Err(e) = pyro_conn.connect().await {
+                    tracing::warn!("Failed to connect to PYRO Platform: {} - running standalone", e);
+                } else {
+                    // Spawn connection loop
+                    tokio::spawn(async move {
+                        pyro_conn.run().await;
+                    });
+
+                    // Process incoming tasks
+                    tokio::spawn(async move {
+                        while let Some(task) = task_rx.recv().await {
+                            let result = worker.process_task(task).await;
+                            tracing::debug!("Task completed: {:?}", result.success);
+                        }
+                    });
+                }
             }
 
             // Keep running
