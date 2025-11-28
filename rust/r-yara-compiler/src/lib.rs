@@ -464,6 +464,9 @@ impl Compiler {
         functions.insert("elf.is_32bit".to_string(), 56);
         functions.insert("elf.is_64bit".to_string(), 57);
 
+        // Register additional PE module functions (60+)
+        functions.insert("pe.imphash".to_string(), 60);
+
         Self {
             current_rule: None,
             string_map: HashMap::new(),

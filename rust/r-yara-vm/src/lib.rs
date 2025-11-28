@@ -1122,6 +1122,13 @@ impl<'a> VM<'a> {
                 }
             }
 
+            // PE imphash function (60)
+            60 => {
+                // pe.imphash()
+                let hash = pe::imphash(ctx.data).unwrap_or_default();
+                Ok(Value::String(SmolStr::new(&hash)))
+            }
+
             _ => Err(VMError::UnknownFunction(function_id)),
         }
     }
@@ -1650,6 +1657,38 @@ mod tests {
         "#;
 
         let matches = compile_and_run(source, b"test");
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_pe_imphash() {
+        let source = r#"
+            import "pe"
+
+            rule test {
+                condition:
+                    pe.imphash() == ""
+            }
+        "#;
+
+        // Non-PE data should return empty string
+        let matches = compile_and_run(source, b"this is not a PE file");
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_pe_imphash_nonexistent() {
+        let source = r#"
+            import "pe"
+
+            rule test {
+                condition:
+                    not pe.is_pe() and pe.imphash() == ""
+            }
+        "#;
+
+        // Non-PE file should return empty imphash
+        let matches = compile_and_run(source, b"not a PE");
         assert_eq!(matches.len(), 1);
     }
 }

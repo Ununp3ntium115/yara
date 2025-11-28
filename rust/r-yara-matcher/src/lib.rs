@@ -215,6 +215,33 @@ pub enum HexToken {
     Alternation(Vec<Vec<HexToken>>),
 }
 
+/// Check if a byte is a word character (alphanumeric or underscore)
+fn is_word_char(b: u8) -> bool {
+    b.is_ascii_alphanumeric() || b == b'_'
+}
+
+/// Check if a match satisfies fullword boundary conditions
+fn check_fullword_boundary(data: &[u8], offset: usize, length: usize) -> bool {
+    // Check byte before match (if exists)
+    if offset > 0 {
+        let before = data[offset - 1];
+        if is_word_char(before) {
+            return false;
+        }
+    }
+
+    // Check byte after match (if exists)
+    let end = offset + length;
+    if end < data.len() {
+        let after = data[end];
+        if is_word_char(after) {
+            return false;
+        }
+    }
+
+    true
+}
+
 impl PatternMatcher {
     /// Create a new pattern matcher from a list of patterns
     pub fn new(patterns: Vec<Pattern>) -> Result<Self, MatcherError> {
@@ -371,6 +398,13 @@ impl PatternMatcher {
                 let offset = m.start();
                 let length = m.end() - m.start();
 
+                // Check fullword if required
+                if let Some(pattern) = self.get_pattern(pattern_id) {
+                    if pattern.modifiers.fullword && !check_fullword_boundary(data, offset, length) {
+                        continue;
+                    }
+                }
+
                 // Deduplicate matches at same position
                 let key = (pattern_id, offset);
                 if !seen.contains_key(&key) {
@@ -383,6 +417,13 @@ impl PatternMatcher {
         // Phase 2: Hex pattern verification
         for (pattern_id, hex_pattern) in &self.hex_patterns {
             for m in match_hex_pattern(data, hex_pattern) {
+                // Check fullword if required
+                if let Some(pattern) = self.get_pattern(*pattern_id) {
+                    if pattern.modifiers.fullword && !check_fullword_boundary(data, m.offset, m.length) {
+                        continue;
+                    }
+                }
+
                 let key = (*pattern_id, m.offset);
                 if !seen.contains_key(&key) {
                     seen.insert(key, true);
@@ -394,6 +435,13 @@ impl PatternMatcher {
         // Phase 3: Regex matching
         for (pattern_id, regex) in &self.regexes {
             for m in regex.find_iter(data) {
+                // Check fullword if required
+                if let Some(pattern) = self.get_pattern(*pattern_id) {
+                    if pattern.modifiers.fullword && !check_fullword_boundary(data, m.start(), m.end() - m.start()) {
+                        continue;
+                    }
+                }
+
                 let key = (*pattern_id, m.start());
                 if !seen.contains_key(&key) {
                     seen.insert(key, true);
@@ -1086,5 +1134,148 @@ mod tests {
         let xor_upper: Vec<u8> = b"TEST".iter().map(|b| b ^ 0x01).collect();
         let matches4 = matcher.scan(&xor_upper);
         assert!(!matches4.is_empty(), "Should match XOR'd uppercase");
+    }
+
+    #[test]
+    fn test_fullword_no_match_in_middle() {
+        // Pattern "test" with fullword should NOT match "testing" or "atest"
+        let mut pattern = Pattern::new(0, b"test".to_vec(), PatternKind::Literal);
+        pattern.modifiers.fullword = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should NOT match in "testing"
+        let matches1 = matcher.scan(b"testing");
+        assert!(matches1.is_empty(), "Should not match 'test' in 'testing'");
+
+        // Should NOT match in "atest"
+        let matches2 = matcher.scan(b"atest");
+        assert!(matches2.is_empty(), "Should not match 'test' in 'atest'");
+
+        // Should NOT match in "atestb"
+        let matches3 = matcher.scan(b"atestb");
+        assert!(matches3.is_empty(), "Should not match 'test' in 'atestb'");
+    }
+
+    #[test]
+    fn test_fullword_match_at_boundaries() {
+        // Pattern "test" with fullword SHOULD match "test " or " test" or standalone "test"
+        let mut pattern = Pattern::new(0, b"test".to_vec(), PatternKind::Literal);
+        pattern.modifiers.fullword = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should match standalone "test"
+        let matches1 = matcher.scan(b"test");
+        assert_eq!(matches1.len(), 1, "Should match standalone 'test'");
+
+        // Should match "test " (space after)
+        let matches2 = matcher.scan(b"test ");
+        assert_eq!(matches2.len(), 1, "Should match 'test '");
+
+        // Should match " test" (space before)
+        let matches3 = matcher.scan(b" test");
+        assert_eq!(matches3.len(), 1, "Should match ' test'");
+
+        // Should match " test " (spaces both sides)
+        let matches4 = matcher.scan(b" test ");
+        assert_eq!(matches4.len(), 1, "Should match ' test '");
+    }
+
+    #[test]
+    fn test_fullword_with_punctuation() {
+        // Test fullword with punctuation boundaries
+        let mut pattern = Pattern::new(0, b"test".to_vec(), PatternKind::Literal);
+        pattern.modifiers.fullword = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should match "test." (dot is not a word char)
+        let matches1 = matcher.scan(b"test.");
+        assert_eq!(matches1.len(), 1, "Should match 'test.'");
+
+        // Should match "(test)"
+        let matches2 = matcher.scan(b"(test)");
+        assert_eq!(matches2.len(), 1, "Should match '(test)'");
+
+        // Should match "test,test"
+        let matches3 = matcher.scan(b"test,test");
+        assert_eq!(matches3.len(), 2, "Should match both 'test' in 'test,test'");
+    }
+
+    #[test]
+    fn test_fullword_no_match_with_underscore() {
+        // Underscore is a word character, so should NOT match
+        let mut pattern = Pattern::new(0, b"test".to_vec(), PatternKind::Literal);
+        pattern.modifiers.fullword = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should NOT match "_test"
+        let matches1 = matcher.scan(b"_test");
+        assert!(matches1.is_empty(), "Should not match '_test'");
+
+        // Should NOT match "test_"
+        let matches2 = matcher.scan(b"test_");
+        assert!(matches2.is_empty(), "Should not match 'test_'");
+
+        // Should NOT match "test_123"
+        let matches3 = matcher.scan(b"test_123");
+        assert!(matches3.is_empty(), "Should not match 'test_123'");
+    }
+
+    #[test]
+    fn test_fullword_with_digits() {
+        // Digits are word characters, so should NOT match
+        let mut pattern = Pattern::new(0, b"test".to_vec(), PatternKind::Literal);
+        pattern.modifiers.fullword = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should NOT match "test123"
+        let matches1 = matcher.scan(b"test123");
+        assert!(matches1.is_empty(), "Should not match 'test123'");
+
+        // Should NOT match "123test"
+        let matches2 = matcher.scan(b"123test");
+        assert!(matches2.is_empty(), "Should not match '123test'");
+    }
+
+    #[test]
+    fn test_fullword_with_regex() {
+        // Test fullword with regex patterns
+        let mut pattern = Pattern::new(0, b"test[0-9]*".to_vec(), PatternKind::Regex);
+        pattern.modifiers.fullword = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should match " test123 "
+        let matches1 = matcher.scan(b" test123 ");
+        assert_eq!(matches1.len(), 1, "Should match ' test123 '");
+
+        // Should NOT match "atest123"
+        let matches2 = matcher.scan(b"atest123");
+        assert!(matches2.is_empty(), "Should not match 'atest123'");
+
+        // Should match "test123." (dot is not a word char)
+        let matches3 = matcher.scan(b"test123.");
+        assert_eq!(matches3.len(), 1, "Should match 'test123.'");
+    }
+
+    #[test]
+    fn test_fullword_with_hex_pattern() {
+        // Test fullword with hex patterns
+        let mut pattern = Pattern::new(0, b"74 65 73 74".to_vec(), PatternKind::Hex); // "test" in hex
+        pattern.modifiers.fullword = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should match " test "
+        let matches1 = matcher.scan(b" test ");
+        assert_eq!(matches1.len(), 1, "Should match ' test ' with hex pattern");
+
+        // Should NOT match "testing"
+        let matches2 = matcher.scan(b"testing");
+        assert!(matches2.is_empty(), "Should not match 'testing' with hex pattern");
     }
 }
