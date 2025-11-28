@@ -872,3 +872,574 @@ pub async fn list_rules(
         "info": "Rules are compiled on-demand for each scan operation"
     }))
 }
+
+// ============================================================================
+// Remote Rule Loading Endpoints
+// ============================================================================
+
+/// Load rules from ZIP request
+#[derive(Deserialize)]
+pub struct LoadRulesFromZipRequest {
+    /// Base64 encoded ZIP data
+    pub zip_data: Option<String>,
+    /// Path to local ZIP file
+    pub zip_path: Option<String>,
+}
+
+/// Load rules from ZIP endpoint
+pub async fn load_rules_from_zip(
+    Json(request): Json<LoadRulesFromZipRequest>,
+) -> Json<serde_json::Value> {
+    use r_yara_scanner::RuleLoader;
+    use base64::Engine;
+
+    let loader = RuleLoader::new();
+
+    let loaded = match (&request.zip_data, &request.zip_path) {
+        (Some(data), _) => {
+            // Decode base64 ZIP data
+            match base64::engine::general_purpose::STANDARD.decode(data) {
+                Ok(bytes) => loader.load_from_zip_bytes(&bytes, "uploaded.zip".to_string()),
+                Err(e) => {
+                    return Json(serde_json::json!({
+                        "success": false,
+                        "error": format!("Invalid base64 data: {}", e)
+                    }));
+                }
+            }
+        }
+        (None, Some(path)) => {
+            loader.load_from_zip(path)
+        }
+        _ => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": "Missing zip_data or zip_path"
+            }));
+        }
+    };
+
+    match loaded {
+        Ok(rules) => {
+            // Try to compile the rules to validate
+            match Scanner::new(rules.as_rules()) {
+                Ok(scanner) => {
+                    let files: Vec<&String> = rules.file_names().collect();
+                    Json(serde_json::json!({
+                        "success": true,
+                        "source": rules.source,
+                        "file_count": rules.file_count(),
+                        "files": files,
+                        "rule_count": scanner.rule_count(),
+                        "pattern_count": scanner.pattern_count(),
+                        "rules": rules.as_rules()
+                    }))
+                }
+                Err(e) => {
+                    Json(serde_json::json!({
+                        "success": false,
+                        "error": format!("Rules compilation failed: {}", e),
+                        "file_count": rules.file_count(),
+                        "files": rules.file_names().collect::<Vec<_>>()
+                    }))
+                }
+            }
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to load ZIP: {}", e)
+            }))
+        }
+    }
+}
+
+/// Load rules from directory request
+#[derive(Deserialize)]
+pub struct LoadRulesFromDirectoryRequest {
+    pub directory: String,
+    pub recursive: Option<bool>,
+}
+
+/// Load rules from directory endpoint
+pub async fn load_rules_from_directory(
+    Json(request): Json<LoadRulesFromDirectoryRequest>,
+) -> Json<serde_json::Value> {
+    use r_yara_scanner::RuleLoader;
+
+    let loader = RuleLoader::new();
+    let recursive = request.recursive.unwrap_or(true);
+
+    match loader.load_from_directory(&request.directory, recursive) {
+        Ok(rules) => {
+            match Scanner::new(rules.as_rules()) {
+                Ok(scanner) => {
+                    Json(serde_json::json!({
+                        "success": true,
+                        "directory": request.directory,
+                        "recursive": recursive,
+                        "file_count": rules.file_count(),
+                        "files": rules.file_names().collect::<Vec<_>>(),
+                        "rule_count": scanner.rule_count(),
+                        "pattern_count": scanner.pattern_count()
+                    }))
+                }
+                Err(e) => {
+                    Json(serde_json::json!({
+                        "success": false,
+                        "error": format!("Rules compilation failed: {}", e)
+                    }))
+                }
+            }
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to load directory: {}", e)
+            }))
+        }
+    }
+}
+
+// ============================================================================
+// Database Endpoints
+// ============================================================================
+
+/// Store scan result request
+#[derive(Deserialize)]
+pub struct StoreScanRequest {
+    pub file_hash: String,
+    pub file_path: Option<String>,
+    pub file_size: Option<i64>,
+    pub file_type: Option<String>,
+    pub scan_duration_ms: Option<i64>,
+    pub rule_count: Option<i64>,
+    pub matches: Option<Vec<MatchInfoRequest>>,
+}
+
+#[derive(Deserialize)]
+pub struct MatchInfoRequest {
+    pub rule_name: String,
+    pub tags: Option<Vec<String>>,
+    pub metadata: Option<HashMap<String, String>>,
+    pub strings: Option<Vec<StringMatchInfoRequest>>,
+}
+
+#[derive(Deserialize)]
+pub struct StringMatchInfoRequest {
+    pub identifier: String,
+    pub offsets: Vec<u64>,
+}
+
+/// Store scan result endpoint
+pub async fn store_scan_result(
+    Extension(state): Extension<Arc<RwLock<AppState>>>,
+    Json(request): Json<StoreScanRequest>,
+) -> Json<serde_json::Value> {
+    use r_yara_scanner::{Database, ScanRecord, MatchInfo, StringMatchInfo};
+
+    // Get database path from config or use default
+    let db_path = {
+        let state = state.read().await;
+        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+    };
+    let db_file = format!("{}/r-yara-scans.db", db_path);
+
+    let db = match Database::open(&db_file) {
+        Ok(db) => db,
+        Err(e) => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to open database: {}", e)
+            }));
+        }
+    };
+
+    let matches: Vec<MatchInfo> = request.matches.unwrap_or_default()
+        .into_iter()
+        .map(|m| MatchInfo {
+            rule_name: m.rule_name,
+            tags: m.tags.unwrap_or_default(),
+            metadata: m.metadata.unwrap_or_default(),
+            strings: m.strings.unwrap_or_default()
+                .into_iter()
+                .map(|s| StringMatchInfo {
+                    identifier: s.identifier,
+                    offsets: s.offsets,
+                })
+                .collect(),
+        })
+        .collect();
+
+    let record = ScanRecord {
+        id: None,
+        file_hash: request.file_hash,
+        file_path: request.file_path,
+        file_size: request.file_size,
+        file_type: request.file_type,
+        scan_time: None,
+        scan_duration_ms: request.scan_duration_ms,
+        rule_count: request.rule_count,
+        matches,
+    };
+
+    match db.store_scan(&record) {
+        Ok(id) => {
+            Json(serde_json::json!({
+                "success": true,
+                "scan_id": id,
+                "message": "Scan result stored"
+            }))
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to store scan: {}", e)
+            }))
+        }
+    }
+}
+
+/// Query scans by hash
+#[derive(Deserialize)]
+pub struct QueryByHashRequest {
+    pub hash: String,
+}
+
+/// Query scans by hash endpoint
+pub async fn query_scans_by_hash(
+    Extension(state): Extension<Arc<RwLock<AppState>>>,
+    Query(params): Query<QueryByHashRequest>,
+) -> Json<serde_json::Value> {
+    use r_yara_scanner::Database;
+
+    let db_path = {
+        let state = state.read().await;
+        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+    };
+    let db_file = format!("{}/r-yara-scans.db", db_path);
+
+    let db = match Database::open(&db_file) {
+        Ok(db) => db,
+        Err(e) => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to open database: {}", e)
+            }));
+        }
+    };
+
+    match db.find_by_hash(&params.hash) {
+        Ok(records) => {
+            let results: Vec<serde_json::Value> = records.iter().map(|r| {
+                serde_json::json!({
+                    "id": r.id,
+                    "file_hash": r.file_hash,
+                    "file_path": r.file_path,
+                    "file_size": r.file_size,
+                    "file_type": r.file_type,
+                    "scan_time": r.scan_time,
+                    "scan_duration_ms": r.scan_duration_ms,
+                    "rule_count": r.rule_count
+                })
+            }).collect();
+
+            Json(serde_json::json!({
+                "success": true,
+                "hash": params.hash,
+                "results": results,
+                "count": results.len()
+            }))
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Query failed: {}", e)
+            }))
+        }
+    }
+}
+
+/// Query scans by rule name
+#[derive(Deserialize)]
+pub struct QueryByRuleRequest {
+    pub rule: String,
+}
+
+/// Query scans by rule endpoint
+pub async fn query_scans_by_rule(
+    Extension(state): Extension<Arc<RwLock<AppState>>>,
+    Query(params): Query<QueryByRuleRequest>,
+) -> Json<serde_json::Value> {
+    use r_yara_scanner::Database;
+
+    let db_path = {
+        let state = state.read().await;
+        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+    };
+    let db_file = format!("{}/r-yara-scans.db", db_path);
+
+    let db = match Database::open(&db_file) {
+        Ok(db) => db,
+        Err(e) => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to open database: {}", e)
+            }));
+        }
+    };
+
+    match db.find_by_rule(&params.rule) {
+        Ok(records) => {
+            let results: Vec<serde_json::Value> = records.iter().map(|r| {
+                serde_json::json!({
+                    "id": r.id,
+                    "file_hash": r.file_hash,
+                    "file_path": r.file_path,
+                    "file_size": r.file_size,
+                    "scan_time": r.scan_time
+                })
+            }).collect();
+
+            Json(serde_json::json!({
+                "success": true,
+                "rule": params.rule,
+                "results": results,
+                "count": results.len()
+            }))
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Query failed: {}", e)
+            }))
+        }
+    }
+}
+
+/// Get database statistics endpoint
+pub async fn get_database_stats(
+    Extension(state): Extension<Arc<RwLock<AppState>>>,
+) -> Json<serde_json::Value> {
+    use r_yara_scanner::Database;
+
+    let db_path = {
+        let state = state.read().await;
+        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+    };
+    let db_file = format!("{}/r-yara-scans.db", db_path);
+
+    let db = match Database::open(&db_file) {
+        Ok(db) => db,
+        Err(e) => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to open database: {}", e)
+            }));
+        }
+    };
+
+    match db.get_statistics() {
+        Ok(stats) => {
+            Json(serde_json::json!({
+                "success": true,
+                "statistics": {
+                    "total_scans": stats.total_scans,
+                    "total_matches": stats.total_matches,
+                    "total_files_scanned": stats.total_files_scanned,
+                    "total_bytes_scanned": stats.total_bytes_scanned,
+                    "last_scan_time": stats.last_scan_time,
+                    "created_at": stats.created_at,
+                    "updated_at": stats.updated_at
+                }
+            }))
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to get statistics: {}", e)
+            }))
+        }
+    }
+}
+
+/// Get recent scans endpoint
+pub async fn get_recent_scans(
+    Extension(state): Extension<Arc<RwLock<AppState>>>,
+    Query(params): Query<HashMap<String, String>>,
+) -> Json<serde_json::Value> {
+    use r_yara_scanner::Database;
+
+    let limit: u32 = params
+        .get("limit")
+        .and_then(|l| l.parse().ok())
+        .unwrap_or(20);
+
+    let db_path = {
+        let state = state.read().await;
+        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+    };
+    let db_file = format!("{}/r-yara-scans.db", db_path);
+
+    let db = match Database::open(&db_file) {
+        Ok(db) => db,
+        Err(e) => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to open database: {}", e)
+            }));
+        }
+    };
+
+    match db.get_recent_scans(limit) {
+        Ok(records) => {
+            let results: Vec<serde_json::Value> = records.iter().map(|r| {
+                serde_json::json!({
+                    "id": r.id,
+                    "file_hash": r.file_hash,
+                    "file_path": r.file_path,
+                    "file_size": r.file_size,
+                    "file_type": r.file_type,
+                    "scan_time": r.scan_time,
+                    "scan_duration_ms": r.scan_duration_ms
+                })
+            }).collect();
+
+            Json(serde_json::json!({
+                "success": true,
+                "results": results,
+                "count": results.len()
+            }))
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Query failed: {}", e)
+            }))
+        }
+    }
+}
+
+// ============================================================================
+// Streaming Scan Endpoints
+// ============================================================================
+
+/// Streaming scan request
+#[derive(Deserialize)]
+pub struct StreamingScanRequest {
+    pub directory: String,
+    pub recursive: Option<bool>,
+    pub rules: String,
+    pub progress_interval: Option<usize>,
+}
+
+/// Streaming scan endpoint - returns scan events as they occur
+pub async fn streaming_scan(
+    Json(request): Json<StreamingScanRequest>,
+) -> Json<serde_json::Value> {
+    use r_yara_scanner::{StreamingScanner, ScanEvent};
+
+    let scanner = match StreamingScanner::new(&request.rules) {
+        Ok(s) => s,
+        Err(e) => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to create scanner: {}", e)
+            }));
+        }
+    };
+
+    let scanner = if let Some(interval) = request.progress_interval {
+        scanner.with_progress_interval(interval)
+    } else {
+        scanner
+    };
+
+    let recursive = request.recursive.unwrap_or(false);
+    let mut events: Vec<serde_json::Value> = Vec::new();
+
+    let result = scanner.scan_directory_with_callback(
+        &request.directory,
+        recursive,
+        None,
+        |event| {
+            let event_json = match &event {
+                ScanEvent::Started { total_files } => {
+                    serde_json::json!({
+                        "type": "started",
+                        "total_files": total_files
+                    })
+                }
+                ScanEvent::FileStart { path, size } => {
+                    serde_json::json!({
+                        "type": "file_start",
+                        "path": path.display().to_string(),
+                        "size": size
+                    })
+                }
+                ScanEvent::Match { path, rule, tags } => {
+                    serde_json::json!({
+                        "type": "match",
+                        "path": path.display().to_string(),
+                        "rule": rule,
+                        "tags": tags
+                    })
+                }
+                ScanEvent::FileComplete { path, matches, duration_ms } => {
+                    serde_json::json!({
+                        "type": "file_complete",
+                        "path": path.display().to_string(),
+                        "matches": matches,
+                        "duration_ms": duration_ms
+                    })
+                }
+                ScanEvent::Error { path, error } => {
+                    serde_json::json!({
+                        "type": "error",
+                        "path": path.display().to_string(),
+                        "error": error
+                    })
+                }
+                ScanEvent::Progress { scanned, total, matched } => {
+                    serde_json::json!({
+                        "type": "progress",
+                        "scanned": scanned,
+                        "total": total,
+                        "matched": matched
+                    })
+                }
+                ScanEvent::Complete { total, matched, duration_ms } => {
+                    serde_json::json!({
+                        "type": "complete",
+                        "total": total,
+                        "matched": matched,
+                        "duration_ms": duration_ms
+                    })
+                }
+            };
+            events.push(event_json);
+        },
+    );
+
+    match result {
+        Ok(summary) => {
+            Json(serde_json::json!({
+                "success": true,
+                "summary": {
+                    "total_files": summary.total_files,
+                    "files_matched": summary.files_matched,
+                    "total_matches": summary.total_matches,
+                    "duration_ms": summary.duration_ms
+                },
+                "events": events
+            }))
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Scan failed: {}", e),
+                "events": events
+            }))
+        }
+    }
+}

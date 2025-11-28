@@ -34,6 +34,24 @@ walkdir = "2.4"
 # Binary parsing
 goblin = "0.8"
 
+# Remote loading
+zip = "2.2"
+
+# Database
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde_json.workspace = true
+
 [dev-dependencies]
 pretty_assertions = "1.4"
 rand.workspace = true
+tempfile = "3.10"
+
+[features]
+default = []
+remote-http = ["reqwest"]
+
+[dependencies.reqwest]
+version = "0.12"
+optional = true
+default-features = false
+features = ["rustls-tls"]

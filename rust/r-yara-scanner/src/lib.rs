@@ -62,13 +62,19 @@
 //! ```
 
 pub mod context;
+pub mod database;
 pub mod error;
+pub mod remote;
 pub mod rules;
+pub mod streaming;
 
 // Re-export key types
 pub use context::{FileType, ModuleData, ScanContext};
+pub use database::{Database, MatchInfo, ScanRecord, Statistics, StoredRules, StringMatchInfo};
 pub use error::{ScanError, ScanResult};
+pub use remote::{LoadedRules, RuleLoader, RuleLoaderConfig, RuleSource};
 pub use rules::{compile_rules, load_rules_from_file, load_rules_from_files, load_rules_from_string};
+pub use streaming::{CancellationToken, EventCollector, ScanEvent, ScanProgress, ScanSummary, StreamingScanner};
 
 use r_yara_compiler::CompiledRules;
 use r_yara_matcher::PatternMatcher;

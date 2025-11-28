@@ -145,6 +145,57 @@ pub fn get_routes() -> Vec<Route> {
             handler: "get_stats".to_string(),
             description: "Get system statistics".to_string(),
         },
+        // Streaming
+        Route {
+            path: "/scan/streaming".to_string(),
+            method: "POST".to_string(),
+            handler: "streaming_scan".to_string(),
+            description: "Streaming directory scan with events".to_string(),
+        },
+        // Remote rule loading
+        Route {
+            path: "/rules/load/zip".to_string(),
+            method: "POST".to_string(),
+            handler: "load_rules_from_zip".to_string(),
+            description: "Load rules from ZIP archive".to_string(),
+        },
+        Route {
+            path: "/rules/load/directory".to_string(),
+            method: "POST".to_string(),
+            handler: "load_rules_from_directory".to_string(),
+            description: "Load rules from directory".to_string(),
+        },
+        // Database
+        Route {
+            path: "/db/scan".to_string(),
+            method: "POST".to_string(),
+            handler: "store_scan_result".to_string(),
+            description: "Store scan result in database".to_string(),
+        },
+        Route {
+            path: "/db/query/hash".to_string(),
+            method: "GET".to_string(),
+            handler: "query_scans_by_hash".to_string(),
+            description: "Query scans by file hash".to_string(),
+        },
+        Route {
+            path: "/db/query/rule".to_string(),
+            method: "GET".to_string(),
+            handler: "query_scans_by_rule".to_string(),
+            description: "Query scans by rule name".to_string(),
+        },
+        Route {
+            path: "/db/stats".to_string(),
+            method: "GET".to_string(),
+            handler: "get_database_stats".to_string(),
+            description: "Get database statistics".to_string(),
+        },
+        Route {
+            path: "/db/recent".to_string(),
+            method: "GET".to_string(),
+            handler: "get_recent_scans".to_string(),
+            description: "Get recent scans".to_string(),
+        },
     ]
 }
 
@@ -162,11 +213,14 @@ pub fn create_router() -> Router {
         .route("/scan/data", post(handlers::scan_data))
         .route("/scan/batch", post(handlers::batch_scan))
         .route("/scan/directory", post(handlers::scan_directory))
+        .route("/scan/streaming", post(handlers::streaming_scan))
         // Modules
         .route("/modules", get(handlers::list_modules))
         // Rules
         .route("/rules", get(handlers::list_rules))
         .route("/rules/load", post(handlers::load_rules))
+        .route("/rules/load/zip", post(handlers::load_rules_from_zip))
+        .route("/rules/load/directory", post(handlers::load_rules_from_directory))
         .route("/rules/validate", post(handlers::validate_rule))
         .route("/rules/compile", post(handlers::compile_rules))
         // Transcoding
@@ -177,6 +231,12 @@ pub fn create_router() -> Router {
         // Worker
         .route("/worker/task", post(handlers::submit_task))
         .route("/worker/task/:task_id", get(handlers::get_task_status))
+        // Database
+        .route("/db/scan", post(handlers::store_scan_result))
+        .route("/db/query/hash", get(handlers::query_scans_by_hash))
+        .route("/db/query/rule", get(handlers::query_scans_by_rule))
+        .route("/db/stats", get(handlers::get_database_stats))
+        .route("/db/recent", get(handlers::get_recent_scans))
         // Stats
         .route("/stats", get(handlers::get_stats))
 }
