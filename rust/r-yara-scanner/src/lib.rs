@@ -64,6 +64,7 @@
 pub mod context;
 pub mod database;
 pub mod error;
+pub mod process;
 pub mod remote;
 pub mod rules;
 pub mod streaming;
@@ -72,6 +73,10 @@ pub mod streaming;
 pub use context::{FileType, ModuleData, ScanContext};
 pub use database::{Database, MatchInfo, ScanRecord, Statistics, StoredRules, StringMatchInfo};
 pub use error::{ScanError, ScanResult};
+pub use process::{
+    MemoryRegion, ProcessInfo, ProcessRuleMatch, ProcessScanOptions, ProcessScanResult,
+    ProcessScanner, scan_process,
+};
 pub use remote::{LoadedRules, RuleLoader, RuleLoaderConfig, RuleSource};
 pub use rules::{compile_rules, load_rules_from_file, load_rules_from_files, load_rules_from_string};
 pub use streaming::{CancellationToken, EventCollector, ScanEvent, ScanProgress, ScanSummary, StreamingScanner};
