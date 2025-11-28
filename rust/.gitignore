@@ -1,0 +1,15 @@
+# Rust build artifacts
+target/
+
+# Editor artifacts
+*.swp
+*.swo
+*~
+
+# IDE directories
+.idea/
+.vscode/
+*.iml
+
+# Debug files
+*.pdb

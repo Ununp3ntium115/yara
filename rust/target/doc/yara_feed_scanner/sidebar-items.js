@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"enum":["FeedType"],"struct":["DiscoveredRule","FeedScanner","RuleMetadata","YaraRuleSource"]};
