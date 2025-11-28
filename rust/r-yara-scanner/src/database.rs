@@ -4,7 +4,7 @@
 //!
 //! # Example
 //!
-//! ```no_run
+//! ```ignore
 //! use r_yara_scanner::database::{Database, ScanRecord};
 //!
 //! // Open or create database

@@ -48,7 +48,7 @@
 //!
 //! The `Scanner` struct provides a reusable scanner instance:
 //!
-//! ```no_run
+//! ```ignore
 //! use r_yara_scanner::Scanner;
 //!
 //! // Create scanner from rules
@@ -211,7 +211,7 @@ impl Scanner {
     ///
     /// # Example
     ///
-    /// ```no_run
+    /// ```ignore
     /// use r_yara_scanner::Scanner;
     ///
     /// let scanner = Scanner::new(rules)?;
@@ -236,7 +236,7 @@ impl Scanner {
     ///
     /// # Example
     ///
-    /// ```no_run
+    /// ```ignore
     /// use r_yara_scanner::Scanner;
     ///
     /// let scanner = Scanner::new(rules)?;

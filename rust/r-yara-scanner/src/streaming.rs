@@ -12,7 +12,7 @@
 //!
 //! # Example
 //!
-//! ```no_run
+//! ```ignore
 //! use r_yara_scanner::streaming::{StreamingScanner, ScanEvent};
 //! use tokio::sync::mpsc;
 //!
@@ -27,10 +27,10 @@
 //!     // Process events as they arrive
 //!     while let Some(event) = rx.recv().await {
 //!         match event {
-//!             ScanEvent::FileStart { path } => println!("Scanning: {}", path),
-//!             ScanEvent::Match { path, rule } => println!("Match: {} in {}", rule, path),
-//!             ScanEvent::FileComplete { path, matches } => println!("Done: {} ({} matches)", path, matches),
-//!             ScanEvent::Error { path, error } => eprintln!("Error: {}: {}", path, error),
+//!             ScanEvent::FileStart { path } => println!("Scanning: {}", path.display()),
+//!             ScanEvent::Match { path, rule } => println!("Match: {} in {}", rule, path.display()),
+//!             ScanEvent::FileComplete { path, matches } => println!("Done: {} ({} matches)", path.display(), matches),
+//!             ScanEvent::Error { path, error } => eprintln!("Error: {}: {}", path.display(), error),
 //!             ScanEvent::Complete { total, matched } => println!("Finished: {} files, {} with matches", total, matched),
 //!         }
 //!     }

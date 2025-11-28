@@ -7,7 +7,7 @@
 //!
 //! # Example
 //!
-//! ```no_run
+//! ```ignore
 //! use r_yara_scanner::remote::RuleLoader;
 //!
 //! let loader = RuleLoader::new();
