@@ -2158,7 +2158,7 @@ checksum = "69cdb34c158ceb288df11e18b4bd39de994f6657d83847bdffdbd7f346754b0f"
 
 [[package]]
 name = "r-yara-api"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "axum",
  "r-yara-feed-scanner",
@@ -2201,7 +2201,7 @@ dependencies = [
 
 [[package]]
 name = "r-yara-compiler"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "bincode",
  "indexmap",
@@ -2233,7 +2233,7 @@ dependencies = [
 
 [[package]]
 name = "r-yara-matcher"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "base64 0.22.1",
  "daachorse",
@@ -2248,7 +2248,7 @@ dependencies = [
 
 [[package]]
 name = "r-yara-modules"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "blake2",
  "blake3",
@@ -2269,7 +2269,7 @@ dependencies = [
 
 [[package]]
 name = "r-yara-parser"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "indexmap",
  "logos",
@@ -2282,7 +2282,7 @@ dependencies = [
 
 [[package]]
 name = "r-yara-pyro"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -2319,7 +2319,7 @@ dependencies = [
 
 [[package]]
 name = "r-yara-scanner"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "anyhow",
  "goblin",
@@ -2357,7 +2357,7 @@ dependencies = [
 
 [[package]]
 name = "r-yara-vm"
-version = "0.1.0"
+version = "0.1.0-alpha.1"
 dependencies = [
  "pretty_assertions",
  "r-yara-compiler",
