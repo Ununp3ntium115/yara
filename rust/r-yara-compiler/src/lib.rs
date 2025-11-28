@@ -45,8 +45,12 @@ use r_yara_parser::{
     AtExpr, BinaryOp, Expression, ForExpr, FunctionCall, OfExpr, QuantifierKind,
     Rule, SourceFile, StringDeclaration, StringPattern, UnaryOp,
 };
+use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
 use std::collections::HashMap;
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
+use std::path::Path;
 use thiserror::Error;
 
 /// Compilation errors
@@ -69,10 +73,16 @@ pub enum CompileError {
 
     #[error("Duplicate string identifier: {0}")]
     DuplicateString(String),
+
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+
+    #[error("Serialization error: {0}")]
+    Serialization(String),
 }
 
 /// Bytecode opcodes
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[repr(u8)]
 pub enum Opcode {
     // Stack operations
@@ -162,7 +172,7 @@ pub enum Opcode {
 }
 
 /// A bytecode instruction
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum Instruction {
     /// Simple opcode without operands
     Simple(Opcode),
@@ -213,7 +223,7 @@ impl Instruction {
 }
 
 /// A compiled YARA rule
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CompiledRule {
     /// Rule name
     pub name: SmolStr,
@@ -234,7 +244,7 @@ pub struct CompiledRule {
 }
 
 /// Metadata value
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum MetaValue {
     String(SmolStr),
     Integer(i64),
@@ -242,7 +252,7 @@ pub enum MetaValue {
 }
 
 /// Compiled rules ready for execution
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CompiledRules {
     /// Bytecode instructions
     pub code: Vec<Instruction>,
@@ -265,6 +275,94 @@ impl Default for CompiledRules {
             strings: Vec::new(),
             imports: Vec::new(),
         }
+    }
+}
+
+impl CompiledRules {
+    /// Save compiled rules to a file in binary format
+    ///
+    /// This uses bincode for efficient binary serialization. The resulting file
+    /// can be loaded later using `CompiledRules::load()`.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use r_yara_compiler::{Compiler, CompiledRules};
+    /// use r_yara_parser::parse;
+    ///
+    /// let source = r#"rule test { condition: true }"#;
+    /// let ast = parse(source).unwrap();
+    /// let mut compiler = Compiler::new();
+    /// let compiled = compiler.compile(&ast).unwrap();
+    ///
+    /// // Save to file
+    /// compiled.save("rules.yarc").unwrap();
+    /// ```
+    pub fn save<P: AsRef<Path>>(&self, path: P) -> Result<(), CompileError> {
+        let file = File::create(path)?;
+        let writer = BufWriter::new(file);
+
+        bincode::serialize_into(writer, self)
+            .map_err(|e| CompileError::Serialization(e.to_string()))?;
+
+        Ok(())
+    }
+
+    /// Save compiled rules to a byte vector
+    ///
+    /// Returns the serialized rules as a `Vec<u8>`.
+    pub fn to_bytes(&self) -> Result<Vec<u8>, CompileError> {
+        bincode::serialize(self)
+            .map_err(|e| CompileError::Serialization(e.to_string()))
+    }
+
+    /// Load compiled rules from a file
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use r_yara_compiler::CompiledRules;
+    ///
+    /// let compiled = CompiledRules::load("rules.yarc").unwrap();
+    /// println!("Loaded {} rules", compiled.rules.len());
+    /// ```
+    pub fn load<P: AsRef<Path>>(path: P) -> Result<Self, CompileError> {
+        let file = File::open(path)?;
+        let reader = BufReader::new(file);
+
+        bincode::deserialize_from(reader)
+            .map_err(|e| CompileError::Serialization(e.to_string()))
+    }
+
+    /// Load compiled rules from a byte slice
+    pub fn from_bytes(data: &[u8]) -> Result<Self, CompileError> {
+        bincode::deserialize(data)
+            .map_err(|e| CompileError::Serialization(e.to_string()))
+    }
+
+    /// Get the number of rules
+    pub fn rule_count(&self) -> usize {
+        self.rules.len()
+    }
+
+    /// Get the number of patterns
+    pub fn pattern_count(&self) -> usize {
+        self.patterns.len()
+    }
+
+    /// Check if there are any rules
+    pub fn is_empty(&self) -> bool {
+        self.rules.is_empty()
+    }
+
+    /// Get a rule by name
+    pub fn get_rule(&self, name: &str) -> Option<&CompiledRule> {
+        self.rules.iter().find(|r| r.name.as_str() == name)
+    }
+
+    /// Get all rule names
+    pub fn rule_names(&self) -> impl Iterator<Item = &str> {
+        self.rules.iter().map(|r| r.name.as_str())
     }
 }
 
@@ -1440,5 +1538,162 @@ mod tests {
                 result.err()
             );
         }
+    }
+
+    #[test]
+    fn test_serialization_roundtrip() {
+        let source = r#"
+            rule test_serialize {
+                meta:
+                    author = "test"
+                    version = 1
+                strings:
+                    $a = "hello"
+                    $b = "world" nocase
+                condition:
+                    any of them
+            }
+        "#;
+
+        let ast = parse(source).unwrap();
+        let mut compiler = Compiler::new();
+        let compiled = compiler.compile(&ast).unwrap();
+
+        // Serialize to bytes
+        let bytes = compiled.to_bytes().expect("Serialization should succeed");
+        assert!(!bytes.is_empty());
+
+        // Deserialize back
+        let loaded = CompiledRules::from_bytes(&bytes).expect("Deserialization should succeed");
+
+        // Verify the roundtrip
+        assert_eq!(compiled.rules.len(), loaded.rules.len());
+        assert_eq!(compiled.patterns.len(), loaded.patterns.len());
+        assert_eq!(compiled.code.len(), loaded.code.len());
+        assert_eq!(compiled.strings.len(), loaded.strings.len());
+
+        // Verify rule details
+        assert_eq!(compiled.rules[0].name, loaded.rules[0].name);
+        assert_eq!(compiled.rules[0].is_private, loaded.rules[0].is_private);
+        assert_eq!(compiled.rules[0].meta, loaded.rules[0].meta);
+    }
+
+    #[test]
+    fn test_serialization_file_roundtrip() {
+        use std::fs;
+
+        let source = r#"
+            rule test_file {
+                strings:
+                    $hex = { 4D 5A 90 00 }
+                condition:
+                    $hex at 0
+            }
+        "#;
+
+        let ast = parse(source).unwrap();
+        let mut compiler = Compiler::new();
+        let compiled = compiler.compile(&ast).unwrap();
+
+        // Create temp directory
+        let temp_dir = std::env::temp_dir().join("r-yara-test");
+        let _ = fs::create_dir_all(&temp_dir);
+        let file_path = temp_dir.join("test_rules.yarc");
+
+        // Save to file
+        compiled.save(&file_path).expect("Save should succeed");
+        assert!(file_path.exists());
+
+        // Load from file
+        let loaded = CompiledRules::load(&file_path).expect("Load should succeed");
+
+        // Verify
+        assert_eq!(compiled.rules.len(), loaded.rules.len());
+        assert_eq!(compiled.rules[0].name.as_str(), "test_file");
+
+        // Cleanup
+        let _ = fs::remove_file(&file_path);
+    }
+
+    #[test]
+    fn test_serialization_multiple_rules() {
+        let source = r#"
+            import "pe"
+
+            rule rule1 : tag1 {
+                meta:
+                    description = "First rule"
+                condition:
+                    true
+            }
+
+            private rule rule2 {
+                strings:
+                    $a = "test"
+                condition:
+                    $a
+            }
+
+            global rule rule3 {
+                condition:
+                    filesize < 1000
+            }
+        "#;
+
+        let ast = parse(source).unwrap();
+        let mut compiler = Compiler::new();
+        let compiled = compiler.compile(&ast).unwrap();
+
+        // Serialize and deserialize
+        let bytes = compiled.to_bytes().unwrap();
+        let loaded = CompiledRules::from_bytes(&bytes).unwrap();
+
+        // Verify all rules
+        assert_eq!(loaded.rules.len(), 3);
+        assert_eq!(loaded.rules[0].name.as_str(), "rule1");
+        assert_eq!(loaded.rules[1].name.as_str(), "rule2");
+        assert_eq!(loaded.rules[2].name.as_str(), "rule3");
+
+        // Verify modifiers
+        assert!(!loaded.rules[0].is_private);
+        assert!(loaded.rules[1].is_private);
+        assert!(loaded.rules[2].is_global);
+
+        // Verify imports
+        assert_eq!(loaded.imports.len(), 1);
+        assert_eq!(loaded.imports[0].as_str(), "pe");
+
+        // Verify tags
+        assert_eq!(loaded.rules[0].tags.len(), 1);
+        assert_eq!(loaded.rules[0].tags[0].as_str(), "tag1");
+    }
+
+    #[test]
+    fn test_compiled_rules_helpers() {
+        let source = r#"
+            rule test1 { condition: true }
+            rule test2 { condition: false }
+        "#;
+
+        let ast = parse(source).unwrap();
+        let mut compiler = Compiler::new();
+        let compiled = compiler.compile(&ast).unwrap();
+
+        // Test helper methods
+        assert_eq!(compiled.rule_count(), 2);
+        assert_eq!(compiled.pattern_count(), 0);
+        assert!(!compiled.is_empty());
+
+        // Test get_rule
+        let rule = compiled.get_rule("test1");
+        assert!(rule.is_some());
+        assert_eq!(rule.unwrap().name.as_str(), "test1");
+
+        // Test rule_names
+        let names: Vec<_> = compiled.rule_names().collect();
+        assert_eq!(names, vec!["test1", "test2"]);
+
+        // Test non-existent rule
+        assert!(compiled.get_rule("nonexistent").is_none());
     }
 }

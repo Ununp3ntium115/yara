@@ -1489,6 +1489,8 @@ checksum = "0ad4bb2b565bca0645f4d68c5c9af97fba094e9791da685bf83cb5f3ce74acf2"
 dependencies = [
  "equivalent",
  "hashbrown 0.16.1",
+ "serde",
+ "serde_core",
 ]
 
 [[package]]
@@ -2158,10 +2160,12 @@ dependencies = [
 name = "r-yara-compiler"
 version = "0.1.0"
 dependencies = [
+ "bincode",
  "indexmap",
  "pretty_assertions",
  "r-yara-matcher",
  "r-yara-parser",
+ "serde",
  "smol_str",
  "thiserror 1.0.69",
 ]
@@ -2194,6 +2198,7 @@ dependencies = [
  "r-yara-parser",
  "rand 0.8.5",
  "regex",
+ "serde",
  "smol_str",
  "thiserror 1.0.69",
 ]

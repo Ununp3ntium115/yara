@@ -28,6 +28,7 @@
 
 use daachorse::{DoubleArrayAhoCorasick, DoubleArrayAhoCorasickBuilder};
 use regex::bytes::Regex;
+use serde::{Deserialize, Serialize};
 use smol_str::SmolStr;
 use std::collections::HashMap;
 use thiserror::Error;
@@ -49,7 +50,7 @@ pub enum MatcherError {
 pub type PatternId = usize;
 
 /// Kind of pattern
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum PatternKind {
     /// Literal byte pattern (fastest)
     Literal,
@@ -66,7 +67,7 @@ pub enum PatternKind {
 }
 
 /// Modifiers that affect matching behavior
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct PatternModifiers {
     /// Case insensitive matching
     pub nocase: bool,
@@ -83,7 +84,7 @@ pub struct PatternModifiers {
 }
 
 /// A pattern to match
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Pattern {
     /// Unique identifier for this pattern
     pub id: PatternId,
