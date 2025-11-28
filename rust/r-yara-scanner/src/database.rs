@@ -40,7 +40,7 @@ impl Database {
     /// Open or create a database at the given path
     pub fn open<P: AsRef<Path>>(path: P) -> ScanResult<Self> {
         let conn = rusqlite::Connection::open(path.as_ref())
-            .map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+            .map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         let db = Self { conn };
         db.init_schema()?;
@@ -51,7 +51,7 @@ impl Database {
     /// Open an in-memory database (for testing)
     pub fn open_memory() -> ScanResult<Self> {
         let conn = rusqlite::Connection::open_in_memory()
-            .map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+            .map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         let db = Self { conn };
         db.init_schema()?;
@@ -128,7 +128,7 @@ impl Database {
 
             -- Initialize statistics row if not exists
             INSERT OR IGNORE INTO statistics (id) VALUES (1);
-        "#).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        "#).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         Ok(())
     }
@@ -136,7 +136,7 @@ impl Database {
     /// Store a scan result
     pub fn store_scan(&self, record: &ScanRecord) -> ScanResult<i64> {
         let tx = self.conn.unchecked_transaction()
-            .map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+            .map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         // Insert scan record
         tx.execute(
@@ -151,7 +151,7 @@ impl Database {
                 record.rule_count,
                 record.matches.len() as i64
             ],
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         let scan_id = tx.last_insert_rowid();
 
@@ -166,7 +166,7 @@ impl Database {
                     match_info.tags.join(","),
                     serde_json::to_string(&match_info.metadata).unwrap_or_default(),
                 ],
-            ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+            ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
             let match_id = tx.last_insert_rowid();
 
@@ -180,7 +180,7 @@ impl Database {
                         string_match.identifier,
                         serde_json::to_string(&string_match.offsets).unwrap_or_default(),
                     ],
-                ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+                ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
             }
         }
 
@@ -198,10 +198,10 @@ impl Database {
                 record.matches.len() as i64,
                 record.file_size.unwrap_or(0),
             ],
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         tx.commit()
-            .map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+            .map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         Ok(scan_id)
     }
@@ -213,7 +213,7 @@ impl Database {
                       scan_duration_ms, rule_count, match_count
                FROM scans WHERE file_hash = ?1
                ORDER BY scan_time DESC"#
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         let records = stmt.query_map([hash], |row| {
             Ok(ScanRecord {
@@ -227,10 +227,10 @@ impl Database {
                 rule_count: row.get(7)?,
                 matches: Vec::new(), // Load separately if needed
             })
-        }).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        }).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         records.collect::<Result<Vec<_>, _>>()
-            .map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))
+            .map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))
     }
 
     /// Find scans by rule name
@@ -242,7 +242,7 @@ impl Database {
                JOIN scan_matches m ON s.id = m.scan_id
                WHERE m.rule_name = ?1
                ORDER BY s.scan_time DESC"#
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         let records = stmt.query_map([rule_name], |row| {
             Ok(ScanRecord {
@@ -256,10 +256,10 @@ impl Database {
                 rule_count: row.get(7)?,
                 matches: Vec::new(),
             })
-        }).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        }).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         records.collect::<Result<Vec<_>, _>>()
-            .map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))
+            .map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))
     }
 
     /// Get recent scans
@@ -270,7 +270,7 @@ impl Database {
                FROM scans
                ORDER BY scan_time DESC
                LIMIT ?1"#
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         let records = stmt.query_map([limit], |row| {
             Ok(ScanRecord {
@@ -284,10 +284,10 @@ impl Database {
                 rule_count: row.get(7)?,
                 matches: Vec::new(),
             })
-        }).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        }).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         records.collect::<Result<Vec<_>, _>>()
-            .map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))
+            .map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))
     }
 
     /// Get statistics
@@ -296,7 +296,7 @@ impl Database {
             r#"SELECT total_scans, total_matches, total_files_scanned,
                       total_bytes_scanned, last_scan_time, created_at, updated_at
                FROM statistics WHERE id = 1"#
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         stmt.query_row([], |row| {
             Ok(Statistics {
@@ -308,7 +308,7 @@ impl Database {
                 created_at: row.get(5)?,
                 updated_at: row.get(6)?,
             })
-        }).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))
+        }).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))
     }
 
     /// Store a rule set
@@ -317,7 +317,7 @@ impl Database {
             r#"INSERT OR REPLACE INTO rules (name, source, rule_count, pattern_count, updated_at)
                VALUES (?1, ?2, ?3, ?4, datetime('now'))"#,
             rusqlite::params![name, source, rule_count, pattern_count],
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         Ok(self.conn.last_insert_rowid())
     }
@@ -327,7 +327,7 @@ impl Database {
         let mut stmt = self.conn.prepare(
             r#"SELECT id, name, source, rule_count, pattern_count, created_at, updated_at
                FROM rules WHERE name = ?1"#
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         let result = stmt.query_row([name], |row| {
             Ok(StoredRules {
@@ -344,7 +344,7 @@ impl Database {
         match result {
             Ok(rules) => Ok(Some(rules)),
             Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
-            Err(e) => Err(ScanError::IoError(std::io::Error::other(e.to_string()))),
+            Err(e) => Err(ScanError::Io(std::io::Error::other(e.to_string()))),
         }
     }
 
@@ -353,7 +353,7 @@ impl Database {
         let mut stmt = self.conn.prepare(
             r#"SELECT id, name, source, rule_count, pattern_count, created_at, updated_at
                FROM rules ORDER BY name"#
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         let rules = stmt.query_map([], |row| {
             Ok(StoredRules {
@@ -365,10 +365,10 @@ impl Database {
                 created_at: row.get(5)?,
                 updated_at: row.get(6)?,
             })
-        }).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        }).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         rules.collect::<Result<Vec<_>, _>>()
-            .map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))
+            .map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))
     }
 
     /// Delete a rule set
@@ -376,7 +376,7 @@ impl Database {
         let rows = self.conn.execute(
             "DELETE FROM rules WHERE name = ?1",
             [name],
-        ).map_err(|e| ScanError::IoError(std::io::Error::other(e.to_string())))?;
+        ).map_err(|e| ScanError::Io(std::io::Error::other(e.to_string())))?;
 
         Ok(rows > 0)
     }

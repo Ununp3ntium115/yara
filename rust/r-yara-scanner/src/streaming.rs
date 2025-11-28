@@ -142,7 +142,7 @@ impl Default for CancellationToken {
 }
 
 /// Progress tracking for streaming scans
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct ScanProgress {
     /// Files scanned
     pub scanned: AtomicUsize,

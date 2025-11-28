@@ -1041,7 +1041,7 @@ pub async fn store_scan_result(
     // Get database path from config or use default
     let db_path = {
         let state = state.read().await;
-        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+        state.config.storage.cache_path.to_string_lossy().to_string()
     };
     let db_file = format!("{}/r-yara-scans.db", db_path);
 
@@ -1115,7 +1115,7 @@ pub async fn query_scans_by_hash(
 
     let db_path = {
         let state = state.read().await;
-        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+        state.config.storage.cache_path.to_string_lossy().to_string()
     };
     let db_file = format!("{}/r-yara-scans.db", db_path);
 
@@ -1175,7 +1175,7 @@ pub async fn query_scans_by_rule(
 
     let db_path = {
         let state = state.read().await;
-        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+        state.config.storage.cache_path.to_string_lossy().to_string()
     };
     let db_file = format!("{}/r-yara-scans.db", db_path);
 
@@ -1225,7 +1225,7 @@ pub async fn get_database_stats(
 
     let db_path = {
         let state = state.read().await;
-        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+        state.config.storage.cache_path.to_string_lossy().to_string()
     };
     let db_file = format!("{}/r-yara-scans.db", db_path);
 
@@ -1277,7 +1277,7 @@ pub async fn get_recent_scans(
 
     let db_path = {
         let state = state.read().await;
-        state.config.data_dir.clone().unwrap_or_else(|| "/tmp".to_string())
+        state.config.storage.cache_path.to_string_lossy().to_string()
     };
     let db_file = format!("{}/r-yara-scans.db", db_path);
 

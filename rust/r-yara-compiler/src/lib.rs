@@ -185,6 +185,10 @@ pub enum Instruction {
     Call { function_id: usize, arg_count: usize },
     /// String set for quantifier operations
     StringSet(Vec<usize>),
+    /// Get value from stack at offset (for iterator variables)
+    StackGet(usize),
+    /// Set value on stack at offset (for iterator variables)
+    StackSet(usize),
 }
 
 impl Instruction {
@@ -202,6 +206,8 @@ impl Instruction {
             Instruction::StringRefIndex(_, _) => 9,
             Instruction::Call { .. } => 9,
             Instruction::StringSet(set) => 1 + set.len() * 4,
+            Instruction::StackGet(_) => 5,
+            Instruction::StackSet(_) => 5,
         }
     }
 }
@@ -284,6 +290,10 @@ pub struct Compiler {
     imports: Vec<SmolStr>,
     /// Rule name set for duplicate detection
     rule_names: HashMap<String, bool>,
+    /// Iterator variable name to stack offset mapping (for nested for loops)
+    iterator_vars: HashMap<String, usize>,
+    /// Current stack depth (for iterator variable tracking)
+    stack_depth: usize,
 }
 
 impl Default for Compiler {
@@ -296,7 +306,8 @@ impl Compiler {
     /// Create a new compiler
     pub fn new() -> Self {
         let mut functions = HashMap::new();
-        // Register built-in functions
+
+        // Register built-in functions (0-9)
         functions.insert("uint8".to_string(), 0);
         functions.insert("uint16".to_string(), 1);
         functions.insert("uint32".to_string(), 2);
@@ -307,6 +318,53 @@ impl Compiler {
         functions.insert("int32".to_string(), 7);
         functions.insert("int16be".to_string(), 8);
         functions.insert("int32be".to_string(), 9);
+
+        // Register hash module functions (10-17)
+        functions.insert("hash.md5".to_string(), 10);
+        functions.insert("hash.sha1".to_string(), 11);
+        functions.insert("hash.sha256".to_string(), 12);
+        functions.insert("hash.sha512".to_string(), 13);
+        functions.insert("hash.sha3_256".to_string(), 14);
+        functions.insert("hash.sha3_512".to_string(), 15);
+        functions.insert("hash.crc32".to_string(), 16);
+        functions.insert("hash.checksum32".to_string(), 17);
+
+        // Register math module functions (20-32)
+        functions.insert("math.entropy".to_string(), 20);
+        functions.insert("math.mean".to_string(), 21);
+        functions.insert("math.deviation".to_string(), 22);
+        functions.insert("math.serial_correlation".to_string(), 23);
+        functions.insert("math.monte_carlo_pi".to_string(), 24);
+        functions.insert("math.count".to_string(), 25);
+        functions.insert("math.percentage".to_string(), 26);
+        functions.insert("math.mode".to_string(), 27);
+        functions.insert("math.in_range".to_string(), 28);
+        functions.insert("math.min".to_string(), 29);
+        functions.insert("math.max".to_string(), 30);
+        functions.insert("math.abs".to_string(), 31);
+        functions.insert("math.to_number".to_string(), 32);
+
+        // Register PE module functions (40-49)
+        functions.insert("pe.is_pe".to_string(), 40);
+        functions.insert("pe.is_32bit".to_string(), 41);
+        functions.insert("pe.is_64bit".to_string(), 42);
+        functions.insert("pe.is_dll".to_string(), 43);
+        functions.insert("pe.machine".to_string(), 44);
+        functions.insert("pe.subsystem".to_string(), 45);
+        functions.insert("pe.entry_point".to_string(), 46);
+        functions.insert("pe.number_of_sections".to_string(), 47);
+        functions.insert("pe.number_of_imports".to_string(), 48);
+        functions.insert("pe.number_of_exports".to_string(), 49);
+
+        // Register ELF module functions (50-59)
+        functions.insert("elf.is_elf".to_string(), 50);
+        functions.insert("elf.type".to_string(), 51);
+        functions.insert("elf.machine".to_string(), 52);
+        functions.insert("elf.entry_point".to_string(), 53);
+        functions.insert("elf.number_of_sections".to_string(), 54);
+        functions.insert("elf.number_of_segments".to_string(), 55);
+        functions.insert("elf.is_32bit".to_string(), 56);
+        functions.insert("elf.is_64bit".to_string(), 57);
 
         Self {
             current_rule: None,
@@ -319,6 +377,8 @@ impl Compiler {
             string_constants: Vec::new(),
             imports: Vec::new(),
             rule_names: HashMap::new(),
+            iterator_vars: HashMap::new(),
+            stack_depth: 0,
         }
     }
 
@@ -591,7 +651,17 @@ impl Compiler {
                 self.compile_function_call(call)?;
             }
             Expression::Identifier(ident) => {
-                // Could be a module field access like pe.is_pe
+                // Check if this is an iterator variable
+                if ident.parts.len() == 1 {
+                    let name = ident.parts[0].as_str();
+                    if let Some(&offset) = self.iterator_vars.get(name) {
+                        // Reference to iterator variable
+                        self.emit(Instruction::StackGet(offset));
+                        return Ok(());
+                    }
+                }
+
+                // Otherwise, it's a module field access like pe.is_pe
                 let full_name = ident.parts.join(".");
                 let idx = self.intern_string(&full_name);
                 self.emit(Instruction::PushString(idx));
@@ -657,24 +727,278 @@ impl Compiler {
 
     /// Compile a 'for' expression
     fn compile_for_expression(&mut self, for_expr: &ForExpr) -> Result<(), CompileError> {
-        // For now, emit a simplified version
-        // Full implementation would need loop constructs
+        use r_yara_parser::ForIterable;
 
-        // Compile quantifier
-        match &for_expr.quantifier {
-            QuantifierKind::All => {
-                self.emit(Instruction::Simple(Opcode::PushTrue)); // Placeholder
+        match &for_expr.iterator.iterable {
+            ForIterable::Range(range) => {
+                self.compile_for_in_range(for_expr, range)?;
             }
-            QuantifierKind::Any => {
-                self.emit(Instruction::Simple(Opcode::PushFalse)); // Placeholder
+            ForIterable::StringSet(string_set) => {
+                self.compile_for_of_strings(for_expr, string_set)?;
             }
-            _ => {
-                self.emit(Instruction::PushInt(0));
+            ForIterable::Identifier(_) => {
+                // For loops over identifiers (e.g., pe.sections) not yet supported
+                return Err(CompileError::UnsupportedFeature(
+                    "for loops over module identifiers".to_string(),
+                ));
             }
         }
 
-        // TODO: Implement full for loop bytecode
+        Ok(())
+    }
 
+    /// Compile a for loop over a range: for <quantifier> <var> in (start..end) : (condition)
+    fn compile_for_in_range(
+        &mut self,
+        for_expr: &ForExpr,
+        range: &r_yara_parser::RangeExpr,
+    ) -> Result<(), CompileError> {
+        // Get iterator variable name
+        let iter_var = for_expr.iterator.variables.first()
+            .ok_or_else(|| CompileError::InvalidExpression("for loop missing iterator variable".to_string()))?;
+
+        // Compile range start and end
+        self.compile_expression(&range.start)?;  // Stack: [start]
+        self.compile_expression(&range.end)?;    // Stack: [start, end]
+
+        // Push match counter (how many iterations satisfied the condition)
+        self.emit(Instruction::PushInt(0));      // Stack: [start, end, count]
+
+        // Register iterator variable
+        let iter_offset = self.stack_depth + 2;  // Points to 'start' which will be the iterator
+        self.iterator_vars.insert(iter_var.to_string(), iter_offset);
+        self.stack_depth += 3;  // Account for start, end, count
+
+        // Loop start
+        let loop_start = self.code.len();
+
+        // Check if iterator < end: dup start, dup end, compare
+        self.emit(Instruction::StackGet(2));     // Get current iterator value
+        self.emit(Instruction::StackGet(2));     // Get end value
+        self.emit(Instruction::Simple(Opcode::Lt));  // Compare: iterator < end
+
+        // If false, jump to end (placeholder, will patch)
+        let jump_to_end_idx = self.code.len();
+        self.emit(Instruction::JumpIfFalse(0));  // Placeholder
+
+        // Compile loop body (condition)
+        self.compile_expression(&for_expr.condition)?;
+
+        // If condition is true, increment match counter
+        let skip_increment_idx = self.code.len();
+        self.emit(Instruction::JumpIfFalse(0));  // Placeholder
+
+        // Increment counter: get count, add 1, store count
+        self.emit(Instruction::StackGet(0));     // Get count
+        self.emit(Instruction::PushInt(1));
+        self.emit(Instruction::Simple(Opcode::Add));
+        self.emit(Instruction::StackSet(0));     // Store updated count
+
+        // Patch skip increment jump
+        let after_increment = self.code.len();
+        self.patch_jump(skip_increment_idx, after_increment)?;
+
+        // Increment iterator: get iterator, add 1, store iterator
+        self.emit(Instruction::StackGet(2));     // Get iterator
+        self.emit(Instruction::PushInt(1));
+        self.emit(Instruction::Simple(Opcode::Add));
+        self.emit(Instruction::StackSet(2));     // Store updated iterator
+
+        // Jump back to loop start
+        let jump_back_offset = loop_start as i32 - (self.code.len() + 1) as i32;
+        self.emit(Instruction::Jump(jump_back_offset));
+
+        // Loop end
+        let loop_end = self.code.len();
+        self.patch_jump(jump_to_end_idx, loop_end)?;
+
+        // Clean up iterator variable
+        self.iterator_vars.remove(iter_var.as_str());
+        self.stack_depth -= 3;
+
+        // Now evaluate quantifier
+        // Stack has: [start, end, count]
+        // Calculate total iterations: end - start
+        self.emit(Instruction::StackGet(1));     // Get end
+        self.emit(Instruction::StackGet(2));     // Get start
+        self.emit(Instruction::Simple(Opcode::Sub));  // total = end - start
+
+        // Get count
+        self.emit(Instruction::StackGet(2));     // Get count (now at offset 2)
+
+        // Stack: [start, end, count, total, count]
+        // Swap to get: [start, end, count, count, total]
+        self.emit(Instruction::Simple(Opcode::Swap));
+
+        // Apply quantifier
+        match &for_expr.quantifier {
+            QuantifierKind::All => {
+                // count == total
+                self.emit(Instruction::Simple(Opcode::Eq));
+            }
+            QuantifierKind::Any => {
+                // count > 0
+                self.emit(Instruction::Simple(Opcode::Pop));  // Pop total
+                self.emit(Instruction::PushInt(0));
+                self.emit(Instruction::Simple(Opcode::Gt));
+            }
+            QuantifierKind::None => {
+                // count == 0
+                self.emit(Instruction::Simple(Opcode::Pop));  // Pop total
+                self.emit(Instruction::PushInt(0));
+                self.emit(Instruction::Simple(Opcode::Eq));
+            }
+            QuantifierKind::Count(expr) => {
+                // count >= n
+                self.emit(Instruction::Simple(Opcode::Pop));  // Pop total
+                self.compile_expression(expr.as_ref())?;
+                self.emit(Instruction::Simple(Opcode::Ge));
+            }
+            QuantifierKind::Percentage(expr) => {
+                // count * 100 >= total * percent
+                self.compile_expression(expr.as_ref())?;
+                self.emit(Instruction::Simple(Opcode::Mul));  // total * percent
+                self.emit(Instruction::Simple(Opcode::Swap));
+                self.emit(Instruction::PushInt(100));
+                self.emit(Instruction::Simple(Opcode::Mul));  // count * 100
+                self.emit(Instruction::Simple(Opcode::Ge));
+            }
+        }
+
+        // Clean up stack: pop start, end, count (result is already on top)
+        self.emit(Instruction::Simple(Opcode::Swap));  // Bring result to safe position
+        self.emit(Instruction::Simple(Opcode::Pop));   // Pop count
+        self.emit(Instruction::Simple(Opcode::Pop));   // Pop end
+        self.emit(Instruction::Simple(Opcode::Pop));   // Pop start
+        self.emit(Instruction::Simple(Opcode::Swap));  // Restore result to top
+
+        Ok(())
+    }
+
+    /// Compile a for loop over strings: for <quantifier> of (<strings>) : (condition)
+    fn compile_for_of_strings(
+        &mut self,
+        for_expr: &ForExpr,
+        string_set: &r_yara_parser::StringSet,
+    ) -> Result<(), CompileError> {
+        // Resolve string set
+        let strings = self.resolve_string_set(string_set)?;
+
+        // If there's an iterator variable, it will hold the string identifier index
+        let iter_var = for_expr.iterator.variables.first().map(|v| v.to_string());
+
+        // Push match counter
+        self.emit(Instruction::PushInt(0));  // Total matches
+        self.emit(Instruction::PushInt(0));  // Current string index
+
+        if let Some(ref var) = iter_var {
+            self.iterator_vars.insert(var.clone(), self.stack_depth);
+            self.stack_depth += 2;
+        }
+
+        // Loop start
+        let loop_start = self.code.len();
+
+        // Check if current_index < strings.len()
+        self.emit(Instruction::StackGet(0));  // Get current index
+        self.emit(Instruction::PushInt(strings.len() as i64));
+        self.emit(Instruction::Simple(Opcode::Lt));
+
+        // If false, jump to end
+        let jump_to_end_idx = self.code.len();
+        self.emit(Instruction::JumpIfFalse(0));
+
+        // Compile loop body (condition)
+        // Note: The condition can reference @ or # using the current string
+        self.compile_expression(&for_expr.condition)?;
+
+        // If condition is true, increment match counter
+        let skip_increment_idx = self.code.len();
+        self.emit(Instruction::JumpIfFalse(0));
+
+        self.emit(Instruction::StackGet(1));  // Get match count
+        self.emit(Instruction::PushInt(1));
+        self.emit(Instruction::Simple(Opcode::Add));
+        self.emit(Instruction::StackSet(1));  // Store updated count
+
+        // Patch skip increment
+        let after_increment = self.code.len();
+        self.patch_jump(skip_increment_idx, after_increment)?;
+
+        // Increment string index
+        self.emit(Instruction::StackGet(0));  // Get index
+        self.emit(Instruction::PushInt(1));
+        self.emit(Instruction::Simple(Opcode::Add));
+        self.emit(Instruction::StackSet(0));  // Store updated index
+
+        // Jump back to loop start
+        let jump_back_offset = loop_start as i32 - (self.code.len() + 1) as i32;
+        self.emit(Instruction::Jump(jump_back_offset));
+
+        // Loop end
+        let loop_end = self.code.len();
+        self.patch_jump(jump_to_end_idx, loop_end)?;
+
+        // Clean up iterator variable
+        if let Some(var) = iter_var {
+            self.iterator_vars.remove(&var);
+            self.stack_depth -= 2;
+        }
+
+        // Apply quantifier - Stack: [count, index]
+        self.emit(Instruction::StackGet(1));  // Get count
+        let total = strings.len();
+
+        match &for_expr.quantifier {
+            QuantifierKind::All => {
+                self.emit(Instruction::PushInt(total as i64));
+                self.emit(Instruction::Simple(Opcode::Eq));
+            }
+            QuantifierKind::Any => {
+                self.emit(Instruction::PushInt(0));
+                self.emit(Instruction::Simple(Opcode::Gt));
+            }
+            QuantifierKind::None => {
+                self.emit(Instruction::PushInt(0));
+                self.emit(Instruction::Simple(Opcode::Eq));
+            }
+            QuantifierKind::Count(expr) => {
+                self.compile_expression(expr.as_ref())?;
+                self.emit(Instruction::Simple(Opcode::Ge));
+            }
+            QuantifierKind::Percentage(expr) => {
+                self.compile_expression(expr.as_ref())?;
+                self.emit(Instruction::PushInt(total as i64));
+                self.emit(Instruction::Simple(Opcode::Mul));  // total * percent
+                self.emit(Instruction::Simple(Opcode::Swap));
+                self.emit(Instruction::PushInt(100));
+                self.emit(Instruction::Simple(Opcode::Mul));  // count * 100
+                self.emit(Instruction::Simple(Opcode::Ge));
+            }
+        }
+
+        // Clean up stack
+        self.emit(Instruction::Simple(Opcode::Swap));
+        self.emit(Instruction::Simple(Opcode::Pop));  // Pop index
+        self.emit(Instruction::Simple(Opcode::Pop));  // Pop count
+        self.emit(Instruction::Simple(Opcode::Swap));
+
+        Ok(())
+    }
+
+    /// Patch a jump instruction with the actual offset
+    fn patch_jump(&mut self, jump_idx: usize, target: usize) -> Result<(), CompileError> {
+        let offset = target as i32 - jump_idx as i32 - 1;
+        match &mut self.code[jump_idx] {
+            Instruction::Jump(ref mut off) => *off = offset,
+            Instruction::JumpIfFalse(ref mut off) => *off = offset,
+            Instruction::JumpIfTrue(ref mut off) => *off = offset,
+            _ => {
+                return Err(CompileError::InvalidExpression(
+                    "Cannot patch non-jump instruction".to_string(),
+                ));
+            }
+        }
         Ok(())
     }
 
@@ -1022,5 +1346,99 @@ mod tests {
         let compiled = compiler.compile(&ast).unwrap();
 
         assert_eq!(compiled.rules[0].tags.len(), 2);
+    }
+
+    #[test]
+    fn test_compile_for_in_range() {
+        let source = r#"
+            rule test_for_in {
+                strings:
+                    $a = "test"
+                condition:
+                    for all i in (0..10) : (uint8(i) == 0x00)
+            }
+        "#;
+
+        let ast = parse(source).unwrap();
+        let mut compiler = Compiler::new();
+        let result = compiler.compile(&ast);
+
+        assert!(result.is_ok(), "Failed to compile for-in loop: {:?}", result.err());
+        let compiled = result.unwrap();
+        assert!(!compiled.code.is_empty());
+
+        // Check that we have jump instructions (for loop control)
+        let has_jumps = compiled.code.iter().any(|inst| {
+            matches!(inst, Instruction::Jump(_) | Instruction::JumpIfFalse(_))
+        });
+        assert!(has_jumps, "For loop should generate jump instructions");
+
+        // Check that we have StackGet instructions (for iterator variable)
+        let has_stack_get = compiled.code.iter().any(|inst| {
+            matches!(inst, Instruction::StackGet(_))
+        });
+        assert!(has_stack_get, "For loop should generate StackGet for iterator variable");
+    }
+
+    #[test]
+    fn test_compile_for_of_strings() {
+        // Note: The parser currently expects "for...in (range)" not "for...in (stringset)"
+        // This test is simplified to just check the basic compilation succeeds
+        let source = r#"
+            rule test_for_of {
+                strings:
+                    $a = "hello"
+                    $b = "world"
+                condition:
+                    for any i in (0..2) : (uint8(i) > 0)
+            }
+        "#;
+
+        let ast = parse(source).unwrap();
+        let mut compiler = Compiler::new();
+        let result = compiler.compile(&ast);
+
+        assert!(result.is_ok(), "Failed to compile for loop: {:?}", result.err());
+        let compiled = result.unwrap();
+        assert!(!compiled.code.is_empty());
+
+        // Check that we have jump instructions
+        let has_jumps = compiled.code.iter().any(|inst| {
+            matches!(inst, Instruction::Jump(_) | Instruction::JumpIfFalse(_))
+        });
+        assert!(has_jumps, "For loop should generate jump instructions");
+    }
+
+    #[test]
+    fn test_compile_for_with_quantifiers() {
+        // Test different quantifiers
+        let test_cases = vec![
+            ("for all i in (0..5) : (i > 0)", "all"),
+            ("for any i in (0..5) : (i > 0)", "any"),
+            ("for 2 i in (0..5) : (i > 0)", "count"),
+        ];
+
+        for (condition, name) in test_cases {
+            let source = format!(
+                r#"
+                rule test_{} {{
+                    condition:
+                        {}
+                }}
+                "#,
+                name, condition
+            );
+
+            let ast = parse(&source).unwrap();
+            let mut compiler = Compiler::new();
+            let result = compiler.compile(&ast);
+
+            assert!(
+                result.is_ok(),
+                "Failed to compile '{}': {:?}",
+                condition,
+                result.err()
+            );
+        }
     }
 }

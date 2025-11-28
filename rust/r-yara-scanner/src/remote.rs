@@ -98,7 +98,7 @@ impl RuleLoader {
     /// Extracts all .yar/.yara files and concatenates them.
     pub fn load_from_zip<P: AsRef<Path>>(&self, path: P) -> ScanResult<LoadedRules> {
         let file = File::open(path.as_ref())
-            .map_err(|e| ScanError::IoError(e))?;
+            .map_err(ScanError::Io)?;
 
         self.load_from_zip_reader(file, path.as_ref().to_string_lossy().to_string())
     }
@@ -116,13 +116,13 @@ impl RuleLoader {
         source: String,
     ) -> ScanResult<LoadedRules> {
         let mut archive = ZipArchive::new(reader)
-            .map_err(|e| ScanError::ParseError(format!("Invalid ZIP archive: {}", e)))?;
+            .map_err(|e| ScanError::InvalidRuleFile(format!("Invalid ZIP archive: {}", e)))?;
 
         let mut rules = LoadedRules::new(source);
 
         for i in 0..archive.len() {
             let mut file = archive.by_index(i)
-                .map_err(|e| ScanError::ParseError(format!("ZIP read error: {}", e)))?;
+                .map_err(|e| ScanError::InvalidRuleFile(format!("ZIP read error: {}", e)))?;
 
             let name = file.name().to_string();
 
@@ -133,7 +133,7 @@ impl RuleLoader {
 
             let mut content = String::new();
             file.read_to_string(&mut content)
-                .map_err(|e| ScanError::IoError(e))?;
+                .map_err(ScanError::Io)?;
 
             rules.add_file(name, content);
         }
@@ -308,7 +308,7 @@ impl RuleSource {
             }
             #[cfg(feature = "remote-http")]
             RuleSource::Url(_) | RuleSource::ZipUrl(_) => {
-                Err(ScanError::ParseError(
+                Err(ScanError::InvalidOptions(
                     "HTTP loading requires async runtime".to_string(),
                 ))
             }

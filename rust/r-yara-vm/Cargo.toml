@@ -20,6 +20,9 @@ r-yara-compiler = { path = "../r-yara-compiler" }
 # Matcher integration
 r-yara-matcher = { path = "../r-yara-matcher" }
 
+# Module functions
+r-yara-modules = { path = "../r-yara-modules" }
+
 # Error handling
 thiserror.workspace = true
 

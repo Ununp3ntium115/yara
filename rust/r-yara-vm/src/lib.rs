@@ -26,6 +26,7 @@
 
 use r_yara_compiler::{CompiledRule, CompiledRules, Instruction, Opcode};
 use r_yara_matcher::{Match, PatternMatcher};
+use r_yara_modules::{elf, hash, math, pe};
 use smol_str::SmolStr;
 use std::collections::HashMap;
 use thiserror::Error;
@@ -329,6 +330,26 @@ impl<'a> VM<'a> {
                     let result = self.call_function(*function_id, *arg_count, &mut stack, ctx)?;
                     stack.push(result);
                 }
+                Instruction::StackGet(offset) => {
+                    // Get value from stack at offset positions from the top
+                    // offset=0 means top, offset=1 means one below top, etc.
+                    let stack_len = stack.len();
+                    if *offset >= stack_len {
+                        return Err(VMError::StackUnderflow);
+                    }
+                    let val = stack[stack_len - 1 - offset].clone();
+                    stack.push(val);
+                }
+                Instruction::StackSet(offset) => {
+                    // Set value on stack at offset positions from the top
+                    // Pops the top value and stores it at the offset position
+                    let val = self.pop(&mut stack)?;
+                    let stack_len = stack.len();
+                    if *offset >= stack_len {
+                        return Err(VMError::StackUnderflow);
+                    }
+                    stack[stack_len - 1 - offset] = val;
+                }
             }
         }
 
@@ -470,11 +491,99 @@ impl<'a> VM<'a> {
             }
 
             // String operations
-            Opcode::Contains | Opcode::IContains | Opcode::StartsWith |
-            Opcode::IStartsWith | Opcode::EndsWith | Opcode::IEndsWith |
-            Opcode::Matches | Opcode::IMatches => {
-                // String comparisons - simplified for now
-                stack.push(Value::Bool(false));
+            Opcode::Contains => {
+                let b = self.pop(stack)?;
+                let a = self.pop(stack)?;
+                let result = match (&a, &b) {
+                    (Value::String(haystack), Value::String(needle)) => {
+                        haystack.contains(needle.as_str())
+                    }
+                    _ => false,
+                };
+                stack.push(Value::Bool(result));
+            }
+            Opcode::IContains => {
+                let b = self.pop(stack)?;
+                let a = self.pop(stack)?;
+                let result = match (&a, &b) {
+                    (Value::String(haystack), Value::String(needle)) => {
+                        haystack.to_lowercase().contains(&needle.to_lowercase())
+                    }
+                    _ => false,
+                };
+                stack.push(Value::Bool(result));
+            }
+            Opcode::StartsWith => {
+                let b = self.pop(stack)?;
+                let a = self.pop(stack)?;
+                let result = match (&a, &b) {
+                    (Value::String(haystack), Value::String(prefix)) => {
+                        haystack.starts_with(prefix.as_str())
+                    }
+                    _ => false,
+                };
+                stack.push(Value::Bool(result));
+            }
+            Opcode::IStartsWith => {
+                let b = self.pop(stack)?;
+                let a = self.pop(stack)?;
+                let result = match (&a, &b) {
+                    (Value::String(haystack), Value::String(prefix)) => {
+                        haystack.to_lowercase().starts_with(&prefix.to_lowercase())
+                    }
+                    _ => false,
+                };
+                stack.push(Value::Bool(result));
+            }
+            Opcode::EndsWith => {
+                let b = self.pop(stack)?;
+                let a = self.pop(stack)?;
+                let result = match (&a, &b) {
+                    (Value::String(haystack), Value::String(suffix)) => {
+                        haystack.ends_with(suffix.as_str())
+                    }
+                    _ => false,
+                };
+                stack.push(Value::Bool(result));
+            }
+            Opcode::IEndsWith => {
+                let b = self.pop(stack)?;
+                let a = self.pop(stack)?;
+                let result = match (&a, &b) {
+                    (Value::String(haystack), Value::String(suffix)) => {
+                        haystack.to_lowercase().ends_with(&suffix.to_lowercase())
+                    }
+                    _ => false,
+                };
+                stack.push(Value::Bool(result));
+            }
+            Opcode::Matches => {
+                let b = self.pop(stack)?;
+                let a = self.pop(stack)?;
+                let result = match (&a, &b) {
+                    (Value::String(text), Value::String(pattern)) => {
+                        regex::Regex::new(pattern.as_str())
+                            .map(|re| re.is_match(text.as_str()))
+                            .unwrap_or(false)
+                    }
+                    _ => false,
+                };
+                stack.push(Value::Bool(result));
+            }
+            Opcode::IMatches => {
+                let b = self.pop(stack)?;
+                let a = self.pop(stack)?;
+                let result = match (&a, &b) {
+                    (Value::String(text), Value::String(pattern)) => {
+                        // Build case-insensitive regex with (?i) flag
+                        let case_insensitive_pattern = format!("(?i){}", pattern);
+                        regex::Regex::new(&case_insensitive_pattern)
+                            .map(|re| re.is_match(text.as_str()))
+                            .unwrap_or(false)
+                    }
+                    _ => false,
+                };
+                stack.push(Value::Bool(result));
             }
 
             // Logical
@@ -646,6 +755,7 @@ impl<'a> VM<'a> {
         args.reverse();
 
         match function_id {
+            // Built-in integer reading functions (0-9)
             0 => {
                 // uint8(offset)
                 let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
@@ -758,6 +868,260 @@ impl<'a> VM<'a> {
                 };
                 Ok(Value::Int(value))
             }
+
+            // Hash module functions (10-17)
+            10 => {
+                // hash.md5(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let hash_str = hash::md5(ctx.data, offset, size);
+                Ok(Value::String(SmolStr::new(&hash_str)))
+            }
+            11 => {
+                // hash.sha1(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let hash_str = hash::sha1(ctx.data, offset, size);
+                Ok(Value::String(SmolStr::new(&hash_str)))
+            }
+            12 => {
+                // hash.sha256(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let hash_str = hash::sha256(ctx.data, offset, size);
+                Ok(Value::String(SmolStr::new(&hash_str)))
+            }
+            13 => {
+                // hash.sha512(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let hash_str = hash::sha512(ctx.data, offset, size);
+                Ok(Value::String(SmolStr::new(&hash_str)))
+            }
+            14 => {
+                // hash.sha3_256(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let hash_str = hash::sha3_256(ctx.data, offset, size);
+                Ok(Value::String(SmolStr::new(&hash_str)))
+            }
+            15 => {
+                // hash.sha3_512(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let hash_str = hash::sha3_512(ctx.data, offset, size);
+                Ok(Value::String(SmolStr::new(&hash_str)))
+            }
+            16 => {
+                // hash.crc32(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let checksum = hash::crc32(ctx.data, offset, size);
+                Ok(Value::Int(checksum as i64))
+            }
+            17 => {
+                // hash.checksum32(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let checksum = hash::checksum32(ctx.data, offset, size);
+                Ok(Value::Int(checksum as i64))
+            }
+
+            // Math module functions (20-32)
+            20 => {
+                // math.entropy(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let entropy = math::entropy(ctx.data, offset, size);
+                Ok(Value::Float(entropy))
+            }
+            21 => {
+                // math.mean(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let mean = math::mean(ctx.data, offset, size);
+                Ok(Value::Float(mean))
+            }
+            22 => {
+                // math.deviation(offset, size, mean)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let mean = args.get(2).map(|v| v.as_float()).unwrap_or(0.0);
+                let deviation = math::deviation(ctx.data, offset, size, mean);
+                Ok(Value::Float(deviation))
+            }
+            23 => {
+                // math.serial_correlation(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let corr = math::serial_correlation(ctx.data, offset, size);
+                Ok(Value::Float(corr))
+            }
+            24 => {
+                // math.monte_carlo_pi(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let pi = math::monte_carlo_pi(ctx.data, offset, size);
+                Ok(Value::Float(pi))
+            }
+            25 => {
+                // math.count(byte, offset, size)
+                let byte = args.get(0).map(|v| v.as_int()).unwrap_or(0) as u8;
+                let offset = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(2).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let count = math::count(byte, ctx.data, offset, size);
+                Ok(Value::Int(count as i64))
+            }
+            26 => {
+                // math.percentage(byte, offset, size)
+                let byte = args.get(0).map(|v| v.as_int()).unwrap_or(0) as u8;
+                let offset = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(2).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let percentage = math::percentage(byte, ctx.data, offset, size);
+                Ok(Value::Float(percentage))
+            }
+            27 => {
+                // math.mode(offset, size)
+                let offset = args.get(0).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let size = args.get(1).map(|v| v.as_int()).unwrap_or(0) as usize;
+                let mode = math::mode(ctx.data, offset, size);
+                Ok(Value::Int(mode as i64))
+            }
+            28 => {
+                // math.in_range(test, lower, upper)
+                let test = args.get(0).map(|v| v.as_float()).unwrap_or(0.0);
+                let lower = args.get(1).map(|v| v.as_float()).unwrap_or(0.0);
+                let upper = args.get(2).map(|v| v.as_float()).unwrap_or(0.0);
+                let in_range = math::in_range(test, lower, upper);
+                Ok(Value::Bool(in_range))
+            }
+            29 => {
+                // math.min(a, b)
+                let a = args.get(0).map(|v| v.as_int()).unwrap_or(0);
+                let b = args.get(1).map(|v| v.as_int()).unwrap_or(0);
+                let min = math::min(a, b);
+                Ok(Value::Int(min))
+            }
+            30 => {
+                // math.max(a, b)
+                let a = args.get(0).map(|v| v.as_int()).unwrap_or(0);
+                let b = args.get(1).map(|v| v.as_int()).unwrap_or(0);
+                let max = math::max(a, b);
+                Ok(Value::Int(max))
+            }
+            31 => {
+                // math.abs(a)
+                let a = args.get(0).map(|v| v.as_int()).unwrap_or(0);
+                let abs = math::abs(a);
+                Ok(Value::Int(abs))
+            }
+            32 => {
+                // math.to_number(bool)
+                let b = args.get(0).map(|v| v.as_bool()).unwrap_or(false);
+                let num = math::to_number(b);
+                Ok(Value::Int(num))
+            }
+
+            // PE module functions (40-49)
+            40 => {
+                // pe.is_pe()
+                let is_pe = pe::is_pe(ctx.data);
+                Ok(Value::Bool(is_pe))
+            }
+            41 => {
+                // pe.is_32bit()
+                let is_32 = pe::is_32bit(ctx.data);
+                Ok(Value::Bool(is_32))
+            }
+            42 => {
+                // pe.is_64bit()
+                let is_64 = pe::is_64bit(ctx.data);
+                Ok(Value::Bool(is_64))
+            }
+            43 => {
+                // pe.is_dll()
+                let is_dll = pe::is_dll(ctx.data);
+                Ok(Value::Bool(is_dll))
+            }
+            44 => {
+                // pe.machine()
+                let machine = pe::get_machine(ctx.data);
+                Ok(Value::Int(machine as i64))
+            }
+            45 => {
+                // pe.subsystem()
+                let subsystem = pe::get_subsystem(ctx.data);
+                Ok(Value::Int(subsystem as i64))
+            }
+            46 => {
+                // pe.entry_point()
+                let entry_point = pe::get_entry_point(ctx.data);
+                Ok(Value::Int(entry_point as i64))
+            }
+            47 => {
+                // pe.number_of_sections()
+                let num_sections = pe::get_number_of_sections(ctx.data);
+                Ok(Value::Int(num_sections as i64))
+            }
+            48 => {
+                // pe.number_of_imports()
+                let num_imports = pe::get_number_of_imports(ctx.data);
+                Ok(Value::Int(num_imports as i64))
+            }
+            49 => {
+                // pe.number_of_exports()
+                let num_exports = pe::get_number_of_exports(ctx.data);
+                Ok(Value::Int(num_exports as i64))
+            }
+
+            // ELF module functions (50-59)
+            50 => {
+                // elf.is_elf()
+                let is_elf = elf::is_elf(ctx.data);
+                Ok(Value::Bool(is_elf))
+            }
+            51 => {
+                // elf.type()
+                let elf_type = elf::get_type(ctx.data);
+                Ok(Value::Int(elf_type as i64))
+            }
+            52 => {
+                // elf.machine()
+                let machine = elf::get_machine(ctx.data);
+                Ok(Value::Int(machine as i64))
+            }
+            53 => {
+                // elf.entry_point()
+                let entry_point = elf::get_entry_point(ctx.data);
+                Ok(Value::Int(entry_point as i64))
+            }
+            54 => {
+                // elf.number_of_sections()
+                let num_sections = elf::get_number_of_sections(ctx.data);
+                Ok(Value::Int(num_sections as i64))
+            }
+            55 => {
+                // elf.number_of_segments()
+                let num_segments = elf::get_number_of_segments(ctx.data);
+                Ok(Value::Int(num_segments as i64))
+            }
+            56 => {
+                // elf.is_32bit()
+                if let Some(elf_info) = elf::ElfInfo::parse(ctx.data) {
+                    Ok(Value::Bool(elf_info.is_32bit()))
+                } else {
+                    Ok(Value::Bool(false))
+                }
+            }
+            57 => {
+                // elf.is_64bit()
+                if let Some(elf_info) = elf::ElfInfo::parse(ctx.data) {
+                    Ok(Value::Bool(elf_info.is_64bit()))
+                } else {
+                    Ok(Value::Bool(false))
+                }
+            }
+
             _ => Err(VMError::UnknownFunction(function_id)),
         }
     }
@@ -1017,6 +1381,275 @@ mod tests {
         // MZ header in little-endian
         let data = [0x4D, 0x5A, 0x90, 0x00];
         let matches = compile_and_run(source, &data);
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_string_contains() {
+        let source = r#"
+            rule test {
+                condition:
+                    "testing" contains "est"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"data");
+        assert_eq!(matches.len(), 1);
+
+        let source_false = r#"
+            rule test {
+                condition:
+                    "testing" contains "xyz"
+            }
+        "#;
+
+        let matches_false = compile_and_run(source_false, b"data");
+        assert!(matches_false.is_empty());
+    }
+
+    #[test]
+    fn test_string_icontains() {
+        let source = r#"
+            rule test {
+                condition:
+                    "TESTING" icontains "est"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"data");
+        assert_eq!(matches.len(), 1);
+
+        let source2 = r#"
+            rule test {
+                condition:
+                    "testing" icontains "EST"
+            }
+        "#;
+
+        let matches2 = compile_and_run(source2, b"data");
+        assert_eq!(matches2.len(), 1);
+    }
+
+    #[test]
+    fn test_string_startswith() {
+        let source = r#"
+            rule test {
+                condition:
+                    "testing" startswith "test"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"data");
+        assert_eq!(matches.len(), 1);
+
+        let source_false = r#"
+            rule test {
+                condition:
+                    "testing" startswith "ing"
+            }
+        "#;
+
+        let matches_false = compile_and_run(source_false, b"data");
+        assert!(matches_false.is_empty());
+    }
+
+    #[test]
+    fn test_string_istartswith() {
+        let source = r#"
+            rule test {
+                condition:
+                    "TESTING" istartswith "test"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"data");
+        assert_eq!(matches.len(), 1);
+
+        let source2 = r#"
+            rule test {
+                condition:
+                    "testing" istartswith "TEST"
+            }
+        "#;
+
+        let matches2 = compile_and_run(source2, b"data");
+        assert_eq!(matches2.len(), 1);
+    }
+
+    #[test]
+    fn test_string_endswith() {
+        let source = r#"
+            rule test {
+                condition:
+                    "testing" endswith "ing"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"data");
+        assert_eq!(matches.len(), 1);
+
+        let source_false = r#"
+            rule test {
+                condition:
+                    "testing" endswith "test"
+            }
+        "#;
+
+        let matches_false = compile_and_run(source_false, b"data");
+        assert!(matches_false.is_empty());
+    }
+
+    #[test]
+    fn test_string_iendswith() {
+        let source = r#"
+            rule test {
+                condition:
+                    "TESTING" iendswith "ing"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"data");
+        assert_eq!(matches.len(), 1);
+
+        let source2 = r#"
+            rule test {
+                condition:
+                    "testing" iendswith "ING"
+            }
+        "#;
+
+        let matches2 = compile_and_run(source2, b"data");
+        assert_eq!(matches2.len(), 1);
+    }
+
+    #[test]
+    fn test_hash_md5() {
+        let source = r#"
+            import "hash"
+
+            rule test {
+                condition:
+                    hash.md5(0, 4) == "098f6bcd4621d373cade4e832627b4f6"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"test");
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_hash_sha256() {
+        let source = r#"
+            import "hash"
+
+            rule test {
+                condition:
+                    hash.sha256(0, filesize) == "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"test");
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_math_entropy() {
+        let source = r#"
+            import "math"
+
+            rule test {
+                condition:
+                    math.entropy(0, filesize) > 0
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"test data with some entropy");
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_math_mean() {
+        let source = r#"
+            import "math"
+
+            rule test {
+                condition:
+                    math.mean(0, 3) == 1
+            }
+        "#;
+
+        // Data: [0, 1, 2] has mean of 1
+        let data = [0u8, 1, 2];
+        let matches = compile_and_run(source, &data);
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_pe_is_pe() {
+        let source = r#"
+            import "pe"
+
+            rule test {
+                condition:
+                    not pe.is_pe()
+            }
+        "#;
+
+        // Non-PE data should return false
+        let matches = compile_and_run(source, b"this is not a PE file");
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_elf_is_elf() {
+        let source = r#"
+            import "elf"
+
+            rule test {
+                condition:
+                    elf.is_elf()
+            }
+        "#;
+
+        // ELF magic number
+        let data = b"\x7fELF";
+        let matches = compile_and_run(source, data);
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_math_min_max() {
+        let source = r#"
+            import "math"
+
+            rule test {
+                condition:
+                    math.min(10, 20) == 10 and
+                    math.max(10, 20) == 20
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"data");
+        assert_eq!(matches.len(), 1);
+    }
+
+    #[test]
+    fn test_combined_modules() {
+        let source = r#"
+            import "hash"
+            import "math"
+
+            rule test {
+                strings:
+                    $a = "test"
+                condition:
+                    $a and
+                    math.entropy(0, filesize) > 0 and
+                    hash.md5(0, 4) == "098f6bcd4621d373cade4e832627b4f6"
+            }
+        "#;
+
+        let matches = compile_and_run(source, b"test");
         assert_eq!(matches.len(), 1);
     }
 }
