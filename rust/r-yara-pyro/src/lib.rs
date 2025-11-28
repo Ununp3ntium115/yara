@@ -35,5 +35,5 @@ pub use hashing::{PyroSignature, HashAlgorithm};
 /// Library version
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// PYRO component identifier
-pub const PYRO_COMPONENT: &str = "r-yara";
+/// PYRO component identifier - Pyro Fire Hydrant API
+pub const PYRO_COMPONENT: &str = "pyro-fire-hydrant";

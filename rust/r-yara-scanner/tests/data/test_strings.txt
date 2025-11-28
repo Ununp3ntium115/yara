@@ -1,0 +1,15 @@
+Hello, World!
+This is a test file for YARA pattern matching.
+
+test test test
+
+The word "example" appears here multiple times.
+Another example line.
+Yet another example.
+
+Some special patterns:
+- malicious code patterns
+- suspicious activity
+- virus signatures
+
+End of test file.

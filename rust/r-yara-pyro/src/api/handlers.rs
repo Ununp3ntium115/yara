@@ -14,6 +14,9 @@ use crate::task_queue::TaskStatus;
 
 use super::server::AppState;
 
+// Import r-yara-scanner
+use r_yara_scanner::{Scanner, MetaValue};
+
 /// Health check response
 #[derive(Serialize)]
 pub struct HealthResponse {
@@ -567,5 +570,305 @@ pub async fn get_stats(
         "scanner": state.scanner.stats().await,
         "transcoder": state.transcoder.stats().await,
         "version": crate::VERSION
+    }))
+}
+
+/// Batch scan request
+#[derive(Deserialize)]
+pub struct BatchScanRequest {
+    pub files: Vec<String>,
+    pub rules: Option<String>,
+    pub rules_file: Option<String>,
+}
+
+/// Batch scan endpoint - Scan multiple files with r-yara-scanner
+pub async fn batch_scan(
+    Extension(_state): Extension<Arc<RwLock<AppState>>>,
+    Json(request): Json<BatchScanRequest>,
+) -> Json<serde_json::Value> {
+    // Get rules source
+    let rules = match (&request.rules, &request.rules_file) {
+        (Some(r), _) => r.clone(),
+        (None, Some(rf)) => match tokio::fs::read_to_string(rf).await {
+            Ok(content) => content,
+            Err(e) => {
+                return Json(serde_json::json!({
+                    "success": false,
+                    "error": format!("Failed to read rules file: {}", e)
+                }));
+            }
+        },
+        _ => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": "Missing rules or rules_file"
+            }));
+        }
+    };
+
+    // Create scanner
+    let scanner = match Scanner::new(&rules) {
+        Ok(s) => s,
+        Err(e) => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to compile rules: {}", e)
+            }));
+        }
+    };
+
+    // Scan all files
+    let mut results = Vec::new();
+    for file_path in &request.files {
+        match scanner.scan_file(file_path) {
+            Ok(matches) => {
+                let matches_json: Vec<serde_json::Value> = matches
+                    .iter()
+                    .map(|m| {
+                        serde_json::json!({
+                            "rule": m.rule_name.as_str(),
+                            "tags": m.tags.iter().map(|t| t.as_str()).collect::<Vec<_>>(),
+                            "strings": m.strings.iter().map(|s| {
+                                serde_json::json!({
+                                    "identifier": s.identifier.as_str(),
+                                    "offsets": s.offsets
+                                })
+                            }).collect::<Vec<_>>(),
+                            "meta": m.meta.iter().map(|(k, v)| {
+                                let value = match v {
+                                    MetaValue::String(s) => serde_json::Value::String(s.to_string()),
+                                    MetaValue::Integer(i) => serde_json::Value::Number((*i).into()),
+                                    MetaValue::Boolean(b) => serde_json::Value::Bool(*b),
+                                    MetaValue::Float(f) => serde_json::json!(f),
+                                };
+                                (k.as_str(), value)
+                            }).collect::<HashMap<_, _>>()
+                        })
+                    })
+                    .collect();
+
+                results.push(serde_json::json!({
+                    "file": file_path,
+                    "success": true,
+                    "matches": matches_json,
+                    "match_count": matches.len()
+                }));
+            }
+            Err(e) => {
+                results.push(serde_json::json!({
+                    "file": file_path,
+                    "success": false,
+                    "error": e.to_string()
+                }));
+            }
+        }
+    }
+
+    Json(serde_json::json!({
+        "success": true,
+        "results": results,
+        "total_files": request.files.len()
+    }))
+}
+
+/// Scan directory request
+#[derive(Deserialize)]
+pub struct ScanDirectoryRequest {
+    pub directory: String,
+    pub recursive: Option<bool>,
+    pub rules: Option<String>,
+    pub rules_file: Option<String>,
+}
+
+/// Scan directory endpoint - Scan all files in a directory with r-yara-scanner
+pub async fn scan_directory(
+    Extension(_state): Extension<Arc<RwLock<AppState>>>,
+    Json(request): Json<ScanDirectoryRequest>,
+) -> Json<serde_json::Value> {
+    // Get rules source
+    let rules = match (&request.rules, &request.rules_file) {
+        (Some(r), _) => r.clone(),
+        (None, Some(rf)) => match tokio::fs::read_to_string(rf).await {
+            Ok(content) => content,
+            Err(e) => {
+                return Json(serde_json::json!({
+                    "success": false,
+                    "error": format!("Failed to read rules file: {}", e)
+                }));
+            }
+        },
+        _ => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": "Missing rules or rules_file"
+            }));
+        }
+    };
+
+    // Create scanner
+    let scanner = match Scanner::new(&rules) {
+        Ok(s) => s,
+        Err(e) => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to compile rules: {}", e)
+            }));
+        }
+    };
+
+    // Scan directory
+    let recursive = request.recursive.unwrap_or(false);
+    match scanner.scan_directory(&request.directory, recursive) {
+        Ok(results) => {
+            let results_json: Vec<serde_json::Value> = results
+                .iter()
+                .map(|result| {
+                    if let Some(err) = &result.error {
+                        serde_json::json!({
+                            "file": result.path.display().to_string(),
+                            "success": false,
+                            "error": err.to_string()
+                        })
+                    } else {
+                        let matches_json: Vec<serde_json::Value> = result.matches
+                            .iter()
+                            .map(|m| {
+                                serde_json::json!({
+                                    "rule": m.rule_name.as_str(),
+                                    "tags": m.tags.iter().map(|t| t.as_str()).collect::<Vec<_>>(),
+                                    "strings": m.strings.iter().map(|s| {
+                                        serde_json::json!({
+                                            "identifier": s.identifier.as_str(),
+                                            "offsets": s.offsets
+                                        })
+                                    }).collect::<Vec<_>>()
+                                })
+                            })
+                            .collect();
+
+                        serde_json::json!({
+                            "file": result.path.display().to_string(),
+                            "success": true,
+                            "matches": matches_json,
+                            "match_count": result.matches.len()
+                        })
+                    }
+                })
+                .collect();
+
+            Json(serde_json::json!({
+                "success": true,
+                "directory": request.directory,
+                "recursive": recursive,
+                "results": results_json,
+                "total_files": results.len()
+            }))
+        }
+        Err(e) => Json(serde_json::json!({
+            "success": false,
+            "error": format!("Directory scan failed: {}", e)
+        })),
+    }
+}
+
+/// List modules endpoint
+pub async fn list_modules() -> Json<serde_json::Value> {
+    Json(serde_json::json!({
+        "success": true,
+        "modules": [
+            {
+                "name": "pe",
+                "description": "Portable Executable (Windows) file analysis",
+                "functions": ["is_pe", "is_dll", "exports", "imports", "sections", "resources"]
+            },
+            {
+                "name": "elf",
+                "description": "Executable and Linkable Format (Linux/Unix) file analysis",
+                "functions": ["is_elf", "type", "machine", "sections", "segments"]
+            },
+            {
+                "name": "macho",
+                "description": "Mach-O (macOS) file analysis",
+                "functions": ["is_macho", "file_type", "commands"]
+            },
+            {
+                "name": "dex",
+                "description": "Android DEX file analysis",
+                "functions": ["is_dex", "classes", "methods"]
+            },
+            {
+                "name": "hash",
+                "description": "Cryptographic hash functions",
+                "functions": ["md5", "sha1", "sha256", "crc32"]
+            },
+            {
+                "name": "math",
+                "description": "Mathematical operations",
+                "functions": ["entropy", "mean", "min", "max"]
+            }
+        ]
+    }))
+}
+
+/// Load rules request
+#[derive(Deserialize)]
+pub struct LoadRulesRequest {
+    pub rules: Option<String>,
+    pub rules_file: Option<String>,
+}
+
+/// Load rules endpoint
+pub async fn load_rules(
+    Json(request): Json<LoadRulesRequest>,
+) -> Json<serde_json::Value> {
+    // Get rules source
+    let rules = match (&request.rules, &request.rules_file) {
+        (Some(r), _) => r.clone(),
+        (None, Some(rf)) => match tokio::fs::read_to_string(rf).await {
+            Ok(content) => content,
+            Err(e) => {
+                return Json(serde_json::json!({
+                    "success": false,
+                    "error": format!("Failed to read rules file: {}", e)
+                }));
+            }
+        },
+        _ => {
+            return Json(serde_json::json!({
+                "success": false,
+                "error": "Missing rules or rules_file"
+            }));
+        }
+    };
+
+    // Try to compile rules to validate
+    match Scanner::new(&rules) {
+        Ok(scanner) => {
+            Json(serde_json::json!({
+                "success": true,
+                "message": "Rules loaded successfully",
+                "rule_count": scanner.rule_count(),
+                "pattern_count": scanner.pattern_count()
+            }))
+        }
+        Err(e) => {
+            Json(serde_json::json!({
+                "success": false,
+                "error": format!("Failed to load rules: {}", e)
+            }))
+        }
+    }
+}
+
+/// List rules endpoint - returns info about loaded rules
+pub async fn list_rules(
+    Extension(_state): Extension<Arc<RwLock<AppState>>>,
+) -> Json<serde_json::Value> {
+    // Note: This endpoint returns available rule information
+    // In a production system, you would track loaded rules in a shared state
+    Json(serde_json::json!({
+        "success": true,
+        "message": "Use POST /rules/load to load rules, then scan with them",
+        "info": "Rules are compiled on-demand for each scan operation"
     }))
 }

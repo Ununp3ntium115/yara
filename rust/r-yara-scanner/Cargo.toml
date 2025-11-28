@@ -1,0 +1,39 @@
+[package]
+name = "r-yara-scanner"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "R-YARA Unified Scanner - Complete YARA scanning engine"
+repository = "https://github.com/Ununp3ntium115/yara"
+keywords = ["yara", "scanner", "malware", "security", "pattern-matching"]
+categories = ["parsing", "development-tools"]
+
+[lib]
+name = "r_yara_scanner"
+path = "src/lib.rs"
+
+[dependencies]
+# Core R-YARA components
+r-yara-parser = { path = "../r-yara-parser" }
+r-yara-compiler = { path = "../r-yara-compiler" }
+r-yara-matcher = { path = "../r-yara-matcher" }
+r-yara-vm = { path = "../r-yara-vm" }
+r-yara-modules = { path = "../r-yara-modules" }
+
+# Error handling
+thiserror.workspace = true
+anyhow.workspace = true
+
+# Utilities
+smol_str = "0.2"
+
+# File system operations
+walkdir = "2.4"
+
+# Binary parsing
+goblin = "0.8"
+
+[dev-dependencies]
+pretty_assertions = "1.4"
+rand.workspace = true

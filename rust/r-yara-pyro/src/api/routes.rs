@@ -19,7 +19,7 @@ pub struct Route {
     pub description: String,
 }
 
-/// All R-YARA API routes
+/// All R-YARA API routes (Fire Hydrant API)
 pub fn get_routes() -> Vec<Route> {
     vec![
         // Health
@@ -61,7 +61,38 @@ pub fn get_routes() -> Vec<Route> {
             handler: "scan_data".to_string(),
             description: "Scan raw data with YARA rules".to_string(),
         },
+        Route {
+            path: "/scan/batch".to_string(),
+            method: "POST".to_string(),
+            handler: "batch_scan".to_string(),
+            description: "Scan multiple files with YARA rules".to_string(),
+        },
+        Route {
+            path: "/scan/directory".to_string(),
+            method: "POST".to_string(),
+            handler: "scan_directory".to_string(),
+            description: "Scan all files in a directory".to_string(),
+        },
+        // Modules
+        Route {
+            path: "/modules".to_string(),
+            method: "GET".to_string(),
+            handler: "list_modules".to_string(),
+            description: "List available YARA modules".to_string(),
+        },
         // Rules
+        Route {
+            path: "/rules".to_string(),
+            method: "GET".to_string(),
+            handler: "list_rules".to_string(),
+            description: "List loaded YARA rules".to_string(),
+        },
+        Route {
+            path: "/rules/load".to_string(),
+            method: "POST".to_string(),
+            handler: "load_rules".to_string(),
+            description: "Load YARA rules from string or file".to_string(),
+        },
         Route {
             path: "/rules/validate".to_string(),
             method: "POST".to_string(),
@@ -117,7 +148,7 @@ pub fn get_routes() -> Vec<Route> {
     ]
 }
 
-/// Create the API router
+/// Create the API router (Fire Hydrant API)
 pub fn create_router() -> Router {
     Router::new()
         // Health
@@ -129,7 +160,13 @@ pub fn create_router() -> Router {
         // Scanning
         .route("/scan/file", post(handlers::scan_file))
         .route("/scan/data", post(handlers::scan_data))
+        .route("/scan/batch", post(handlers::batch_scan))
+        .route("/scan/directory", post(handlers::scan_directory))
+        // Modules
+        .route("/modules", get(handlers::list_modules))
         // Rules
+        .route("/rules", get(handlers::list_rules))
+        .route("/rules/load", post(handlers::load_rules))
         .route("/rules/validate", post(handlers::validate_rule))
         .route("/rules/compile", post(handlers::compile_rules))
         // Transcoding
@@ -174,13 +211,13 @@ pub fn openapi_spec() -> serde_json::Value {
     serde_json::json!({
         "openapi": "3.0.0",
         "info": {
-            "title": "R-YARA API",
+            "title": "PYRO Fire Hydrant API",
             "version": crate::VERSION,
-            "description": "R-YARA YARA rule management and scanning API"
+            "description": "High-pressure YARA scanning powered by R-YARA - unified scanner with batch and directory scanning"
         },
         "paths": paths,
         "tags": [
-            { "name": "r-yara", "description": "R-YARA operations" }
+            { "name": "r-yara", "description": "Fire Hydrant YARA operations" }
         ]
     })
 }
@@ -199,6 +236,6 @@ mod tests {
     #[test]
     fn test_openapi_spec() {
         let spec = openapi_spec();
-        assert_eq!(spec["info"]["title"], "R-YARA API");
+        assert_eq!(spec["info"]["title"], "PYRO Fire Hydrant API");
     }
 }

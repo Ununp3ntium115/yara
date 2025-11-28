@@ -76,6 +76,7 @@ hex = "0.4"
 
 # Internal dependencies
 r-yara-store = { path = "../r-yara-store" }
+r-yara-scanner = { path = "../r-yara-scanner" }
 
 [dev-dependencies]
 tokio-test = "0.4"

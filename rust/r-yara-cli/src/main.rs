@@ -2,9 +2,18 @@
 /// Provides command-line interface for all R-YARA operations
 
 use clap::{Parser, Subcommand};
-use r_yara_store::CryptexStore;
-use r_yara_feed_scanner::FeedScanner;
 use std::path::PathBuf;
+
+mod scan;
+mod compile;
+mod check;
+mod info;
+mod dict;
+mod feed;
+mod server;
+mod output;
+
+use anyhow::Result;
 
 #[derive(Parser)]
 #[command(name = "r-yara")]
@@ -12,30 +21,135 @@ use std::path::PathBuf;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
-    
-    /// Database path
-    #[arg(short, long, default_value = "cryptex.db")]
-    database: PathBuf,
 }
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Scan files or directories with YARA rules
+    Scan {
+        /// YARA rules file or directory
+        rules: PathBuf,
+
+        /// Target file or directory to scan
+        target: PathBuf,
+
+        /// Scan directories recursively
+        #[arg(short, long)]
+        recursive: bool,
+
+        /// Number of threads to use
+        #[arg(short, long, default_value_t = num_cpus::get())]
+        threads: usize,
+
+        /// Output format: text, json, csv
+        #[arg(short, long, default_value = "text")]
+        output: String,
+
+        /// Maximum matches per rule (0 = unlimited)
+        #[arg(short, long, default_value_t = 0)]
+        max_matches: usize,
+
+        /// Scan timeout in seconds (0 = no timeout)
+        #[arg(long, default_value_t = 0)]
+        timeout: u64,
+
+        /// Only print matching files
+        #[arg(short = 'n', long)]
+        negate: bool,
+
+        /// Print matching strings
+        #[arg(short = 's', long)]
+        print_strings: bool,
+
+        /// Print string length
+        #[arg(short = 'l', long)]
+        print_string_length: bool,
+
+        /// Print tags
+        #[arg(short = 'g', long)]
+        print_tags: bool,
+
+        /// Print metadata
+        #[arg(short = 'e', long)]
+        print_meta: bool,
+
+        /// Fast matching mode (scan only)
+        #[arg(short, long)]
+        fast_scan: bool,
+    },
+
+    /// Compile YARA rules to binary format
+    Compile {
+        /// YARA rules file or directory
+        rules: PathBuf,
+
+        /// Output file path
+        #[arg(short, long)]
+        output: PathBuf,
+    },
+
+    /// Check and validate YARA rules
+    Check {
+        /// YARA rules file or directory
+        rules: PathBuf,
+
+        /// Show warnings
+        #[arg(short, long)]
+        warnings: bool,
+
+        /// Detailed output
+        #[arg(short, long)]
+        verbose: bool,
+    },
+
+    /// Show file information (hashes, entropy, file type)
+    Info {
+        /// File to analyze
+        file: PathBuf,
+
+        /// Show detailed PE information
+        #[arg(long)]
+        pe: bool,
+
+        /// Show detailed ELF information
+        #[arg(long)]
+        elf: bool,
+
+        /// Show detailed Mach-O information
+        #[arg(long)]
+        macho: bool,
+
+        /// Show detailed DEX information
+        #[arg(long)]
+        dex: bool,
+
+        /// Calculate all hashes
+        #[arg(long)]
+        hashes: bool,
+    },
+
     /// Dictionary operations
     Dict {
         #[command(subcommand)]
         cmd: DictCommands,
+
+        /// Database path
+        #[arg(short, long, default_value = "cryptex.db")]
+        database: PathBuf,
     },
+
     /// Feed scanner operations
     Feed {
         #[command(subcommand)]
         cmd: FeedCommands,
     },
+
     /// Server operations
     Server {
         /// Port to listen on
         #[arg(short, long, default_value_t = 3006)]
         port: u16,
-        
+
         /// Host to bind to
         #[arg(long, default_value = "0.0.0.0")]
         host: String,
@@ -75,7 +189,7 @@ enum FeedCommands {
         /// Use case: all, new_tasks, old_tasks, malware, apt, ransomware
         #[arg(short, long, default_value = "all")]
         use_case: String,
-        
+
         /// Output file
         #[arg(short, long)]
         output: Option<PathBuf>,
@@ -85,102 +199,80 @@ enum FeedCommands {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() -> Result<()> {
     let cli = Cli::parse();
-    
-    match cli.command {
-        Commands::Dict { cmd } => {
-            let store = if cli.database.exists() {
-                CryptexStore::open(cli.database.to_str().unwrap())?
-            } else {
-                let s = CryptexStore::new(cli.database.to_str().unwrap())?;
-                s.initialize()?;
-                s
-            };
-            
-            match cmd {
-                DictCommands::Import { input } => {
-                    println!("Importing dictionary from {:?}...", input);
-                    let json = std::fs::read_to_string(&input)?;
-                    let count = store.import_from_json(&json)?;
-                    println!("Imported {} entries", count);
-                }
-                DictCommands::Export { output } => {
-                    println!("Exporting dictionary to {:?}...", output);
-                    let entries = store.get_all_entries()?;
-                    let json = serde_json::to_string_pretty(&serde_json::json!({
-                        "entries": entries
-                    }))?;
-                    std::fs::write(&output, json)?;
-                    println!("Exported {} entries", entries.len());
-                }
-                DictCommands::Lookup { query } => {
-                    if let Some(entry) = store.lookup_by_symbol(&query).ok().flatten() {
-                        println!("{}", serde_json::to_string_pretty(&entry)?);
-                    } else if let Some(entry) = store.lookup_by_codename(&query).ok().flatten() {
-                        println!("{}", serde_json::to_string_pretty(&entry)?);
-                    } else {
-                        println!("Entry not found: {}", query);
-                    }
-                }
-                DictCommands::Search { query } => {
-                    let results = store.search_entries(&query)?;
-                    println!("Found {} entries:", results.len());
-                    for entry in results {
-                        println!("  {} -> {}", entry.symbol, entry.pyro_name);
-                    }
-                }
-                DictCommands::Stats => {
-                    let stats = store.get_statistics()?;
-                    println!("R-YARA Dictionary Statistics:");
-                    println!("  Total entries: {}", stats.total_entries);
-                    println!("  Functions: {}", stats.functions);
-                    println!("  CLI tools: {}", stats.cli_tools);
-                    println!("  Modules: {}", stats.modules);
-                }
-            }
-        }
-        Commands::Feed { cmd } => {
-            let scanner = FeedScanner::new();
-            
-            match cmd {
-                FeedCommands::Scan { use_case, output } => {
-                    println!("Scanning feeds for use case: {}...", use_case);
-                    let rules = match use_case.as_str() {
-                        "new_tasks" => scanner.scan_for_new_tasks().await?,
-                        "old_tasks" => scanner.scan_for_old_tasks().await?,
-                        "malware" => scanner.scan_for_malware_detection().await?,
-                        "apt" => scanner.scan_for_apt_detection().await?,
-                        "ransomware" => scanner.scan_for_ransomware_detection().await?,
-                        _ => scanner.scan_all().await?,
-                    };
-                    
-                    println!("Found {} rules", rules.len());
-                    
-                    if let Some(output_path) = output {
-                        let json = serde_json::to_string_pretty(&rules)?;
-                        std::fs::write(&output_path, json)?;
-                        println!("Saved to {:?}", output_path);
-                    }
-                }
-                FeedCommands::List => {
-                    println!("Available sources:");
-                    for source in &scanner.sources {
-                        println!("  - {} ({})", source.name, source.url);
-                    }
-                }
-            }
-        }
-        Commands::Server { port, host } => {
-            println!("Starting R-YARA API server on {}:{}", host, port);
-            println!("Press Ctrl+C to stop");
 
-            // Start server (would use r-yara-api here)
-            tokio::signal::ctrl_c().await?;
-            println!("\nShutting down...");
+    match cli.command {
+        Commands::Scan {
+            rules,
+            target,
+            recursive,
+            threads,
+            output,
+            max_matches,
+            timeout,
+            negate,
+            print_strings,
+            print_string_length,
+            print_tags,
+            print_meta,
+            fast_scan,
+        } => {
+            scan::scan(scan::ScanOptions {
+                rules_path: rules,
+                target_path: target,
+                recursive,
+                threads,
+                output_format: output,
+                max_matches,
+                timeout,
+                negate,
+                print_strings,
+                print_string_length,
+                print_tags,
+                print_meta,
+                fast_scan,
+            })?;
+        }
+
+        Commands::Compile { rules, output } => {
+            compile::compile(rules, output)?;
+        }
+
+        Commands::Check { rules, warnings, verbose } => {
+            check::check(rules, warnings, verbose)?;
+        }
+
+        Commands::Info {
+            file,
+            pe,
+            elf,
+            macho,
+            dex,
+            hashes,
+        } => {
+            info::show_info(info::InfoOptions {
+                file_path: file,
+                show_pe: pe,
+                show_elf: elf,
+                show_macho: macho,
+                show_dex: dex,
+                show_hashes: hashes,
+            })?;
+        }
+
+        Commands::Dict { cmd, database } => {
+            dict::handle_dict_command(cmd, database)?;
+        }
+
+        Commands::Feed { cmd } => {
+            feed::handle_feed_command(cmd).await?;
+        }
+
+        Commands::Server { port, host } => {
+            server::run_server(host, port).await?;
         }
     }
-    
+
     Ok(())
 }
-

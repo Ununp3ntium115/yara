@@ -298,14 +298,19 @@ async fn run_gateway(
 }
 
 fn print_info() {
-    println!("R-YARA PYRO Platform Integration");
-    println!("================================");
+    println!("PYRO Fire Hydrant API");
+    println!("=====================");
     println!("Version: {}", r_yara_pyro::VERSION);
     println!("Component: {}", r_yara_pyro::PYRO_COMPONENT);
     println!();
+    println!("The Fire Hydrant - High-pressure YARA scanning powered by R-YARA");
+    println!();
     println!("Features:");
-    println!("  - YARA rule scanning (file and data)");
-    println!("  - Rule validation and compilation");
+    println!("  - Unified YARA scanning with r-yara-scanner");
+    println!("  - File and data scanning");
+    println!("  - Batch scanning and directory scanning");
+    println!("  - Rule management and compilation");
+    println!("  - Module introspection (PE, ELF, Hash, Math, etc.)");
     println!("  - Codename transcoding (encode/decode)");
     println!("  - Dictionary lookup and search");
     println!("  - Feed scanning integration");
@@ -313,17 +318,23 @@ fn print_info() {
     println!("  - API gateway with load balancing");
     println!();
     println!("API Endpoints:");
-    println!("  /api/v2/r-yara/health           - Health check");
-    println!("  /api/v2/r-yara/scan/file        - Scan file");
-    println!("  /api/v2/r-yara/scan/data        - Scan data");
-    println!("  /api/v2/r-yara/rules/validate   - Validate rule");
-    println!("  /api/v2/r-yara/transcode/encode - Encode rule");
-    println!("  /api/v2/r-yara/transcode/decode - Decode rule");
-    println!("  /api/v2/r-yara/dictionary/*     - Dictionary ops");
-    println!("  /api/v2/r-yara/stats            - Statistics");
+    println!("  /api/v2/r-yara/health                - Health check");
+    println!("  /api/v2/r-yara/scan/file             - Scan single file");
+    println!("  /api/v2/r-yara/scan/data             - Scan raw data");
+    println!("  /api/v2/r-yara/scan/batch            - Scan multiple files");
+    println!("  /api/v2/r-yara/scan/directory        - Scan directory");
+    println!("  /api/v2/r-yara/modules               - List available modules");
+    println!("  /api/v2/r-yara/rules                 - List loaded rules");
+    println!("  /api/v2/r-yara/rules/load            - Load rules");
+    println!("  /api/v2/r-yara/rules/validate        - Validate rule");
+    println!("  /api/v2/r-yara/rules/compile         - Compile rules");
+    println!("  /api/v2/r-yara/transcode/encode      - Encode rule");
+    println!("  /api/v2/r-yara/transcode/decode      - Decode rule");
+    println!("  /api/v2/r-yara/dictionary/*          - Dictionary ops");
+    println!("  /api/v2/r-yara/stats                 - Statistics");
     println!();
     println!("Usage:");
-    println!("  r-yara-pyro server              - Start API server");
+    println!("  r-yara-pyro server              - Start Fire Hydrant API server");
     println!("  r-yara-pyro worker -t scanner   - Run scanner worker");
     println!("  r-yara-pyro gateway             - Start gateway");
     println!("  r-yara-pyro config --generate   - Generate config");
