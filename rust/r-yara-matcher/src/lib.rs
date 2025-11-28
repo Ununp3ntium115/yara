@@ -379,59 +379,117 @@ impl PatternMatcher {
 
 /// Parse a hex pattern from bytes into a structured form
 fn parse_hex_pattern(bytes: &[u8]) -> Result<HexPattern, MatcherError> {
-    // For now, treat the entire pattern as a sequence of bytes/wildcards
-    // This is a simplified parser - full implementation would handle all YARA hex syntax
+    // Parse hex patterns including jumps, wildcards, and nibble wildcards
     let mut tokens = Vec::new();
     let mut atoms = Vec::new();
     let mut current_atom = Vec::new();
 
     let mut i = 0;
     while i < bytes.len() {
-        match bytes[i] {
-            b'?' => {
-                // Flush current atom
-                if !current_atom.is_empty() {
-                    atoms.push(current_atom.clone());
-                    current_atom.clear();
-                }
+        // Skip whitespace
+        while i < bytes.len() && matches!(bytes[i], b' ' | b'\t' | b'\n' | b'\r') {
+            i += 1;
+        }
+        if i >= bytes.len() {
+            break;
+        }
 
-                if i + 1 < bytes.len() && bytes[i + 1] == b'?' {
-                    tokens.push(HexToken::Wildcard);
-                    i += 2;
-                } else {
-                    tokens.push(HexToken::Wildcard);
-                    i += 1;
-                }
-            }
+        match bytes[i] {
             b'[' => {
-                // Jump marker
+                // Jump marker: [n], [n-m], or [n-]
                 if !current_atom.is_empty() {
                     atoms.push(current_atom.clone());
                     current_atom.clear();
                 }
 
                 // Find closing bracket
-                let end = bytes[i..].iter().position(|&b| b == b']').unwrap_or(0) + i;
-                // Parse range (simplified)
-                tokens.push(HexToken::Jump {
-                    min: 0,
-                    max: Some(100),
-                });
-                i = end + 1;
-            }
-            b' ' | b'\t' | b'\n' | b'\r' => {
-                i += 1;
+                let end_pos = bytes[i..].iter().position(|&b| b == b']');
+                if let Some(end_offset) = end_pos {
+                    let end = i + end_offset;
+                    let inner = &bytes[i + 1..end];
+                    let inner_str = String::from_utf8_lossy(inner).trim().to_string();
+
+                    // Parse the range
+                    let (min, max) = if inner_str.contains('-') {
+                        let parts: Vec<&str> = inner_str.split('-').collect();
+                        let min_val = parts[0].trim().parse::<usize>().unwrap_or(0);
+                        let max_val = if parts.len() > 1 && !parts[1].trim().is_empty() {
+                            Some(parts[1].trim().parse::<usize>().unwrap_or(min_val))
+                        } else {
+                            None // Unbounded: [n-]
+                        };
+                        (min_val, max_val)
+                    } else {
+                        // Fixed jump: [n]
+                        let val = inner_str.parse::<usize>().unwrap_or(0);
+                        (val, Some(val))
+                    };
+
+                    tokens.push(HexToken::Jump { min, max });
+                    i = end + 1;
+                } else {
+                    i += 1;
+                }
             }
             c if c.is_ascii_hexdigit() => {
-                // Parse hex byte
-                if i + 1 < bytes.len() && bytes[i + 1].is_ascii_hexdigit() {
-                    let hex_str = std::str::from_utf8(&bytes[i..i + 2]).unwrap_or("00");
-                    if let Ok(byte) = u8::from_str_radix(hex_str, 16) {
-                        tokens.push(HexToken::Byte(byte));
-                        current_atom.push(byte);
+                // Could be hex byte or nibble wildcard (X? or ?X)
+                if i + 1 < bytes.len() {
+                    let next = bytes[i + 1];
+                    if next == b'?' {
+                        // Nibble wildcard: X? (high nibble fixed)
+                        if !current_atom.is_empty() {
+                            atoms.push(current_atom.clone());
+                            current_atom.clear();
+                        }
+                        let high_nibble = char_to_nibble(c);
+                        tokens.push(HexToken::NibbleWildcard {
+                            high: Some(high_nibble),
+                            low: None,
+                        });
+                        i += 2;
+                    } else if next.is_ascii_hexdigit() {
+                        // Full hex byte
+                        let hex_str = std::str::from_utf8(&bytes[i..i + 2]).unwrap_or("00");
+                        if let Ok(byte) = u8::from_str_radix(hex_str, 16) {
+                            tokens.push(HexToken::Byte(byte));
+                            current_atom.push(byte);
+                        }
+                        i += 2;
+                    } else {
+                        i += 1;
                     }
-                    i += 2;
                 } else {
+                    i += 1;
+                }
+            }
+            b'?' => {
+                // Could be full wildcard (??) or nibble wildcard (?X)
+                if !current_atom.is_empty() {
+                    atoms.push(current_atom.clone());
+                    current_atom.clear();
+                }
+
+                if i + 1 < bytes.len() {
+                    let next = bytes[i + 1];
+                    if next == b'?' {
+                        // Full wildcard ??
+                        tokens.push(HexToken::Wildcard);
+                        i += 2;
+                    } else if next.is_ascii_hexdigit() {
+                        // Nibble wildcard: ?X (low nibble fixed)
+                        let low_nibble = char_to_nibble(next);
+                        tokens.push(HexToken::NibbleWildcard {
+                            high: None,
+                            low: Some(low_nibble),
+                        });
+                        i += 2;
+                    } else {
+                        // Single ? - treat as full wildcard
+                        tokens.push(HexToken::Wildcard);
+                        i += 1;
+                    }
+                } else {
+                    tokens.push(HexToken::Wildcard);
                     i += 1;
                 }
             }
@@ -463,8 +521,18 @@ fn parse_hex_pattern(bytes: &[u8]) -> Result<HexPattern, MatcherError> {
         atoms,
         tokens,
         min_length,
-        max_length: None, // Could calculate but leave open for now
+        max_length: None,
     })
+}
+
+/// Convert a hex character to its nibble value
+fn char_to_nibble(c: u8) -> u8 {
+    match c {
+        b'0'..=b'9' => c - b'0',
+        b'a'..=b'f' => c - b'a' + 10,
+        b'A'..=b'F' => c - b'A' + 10,
+        _ => 0,
+    }
 }
 
 /// Match a hex pattern against data
@@ -475,66 +543,101 @@ fn match_hex_pattern(data: &[u8], pattern: &HexPattern) -> Vec<Match> {
         return matches;
     }
 
-    // Simple brute-force matching for now
-    // A production implementation would use atoms for filtering
-    'outer: for start in 0..data.len() {
-        let mut pos = start;
-        let mut token_idx = 0;
-
-        while token_idx < pattern.tokens.len() && pos < data.len() {
-            match &pattern.tokens[token_idx] {
-                HexToken::Byte(b) => {
-                    if data[pos] != *b {
-                        continue 'outer;
-                    }
-                    pos += 1;
-                }
-                HexToken::Wildcard => {
-                    pos += 1;
-                }
-                HexToken::NibbleWildcard { high, low } => {
-                    let byte = data[pos];
-                    if let Some(h) = high {
-                        if (byte >> 4) != *h {
-                            continue 'outer;
-                        }
-                    }
-                    if let Some(l) = low {
-                        if (byte & 0x0F) != *l {
-                            continue 'outer;
-                        }
-                    }
-                    pos += 1;
-                }
-                HexToken::Jump { min, max: _ } => {
-                    // For jumps, we need to try different skip amounts
-                    // Simplified: just skip min bytes and continue
-                    pos += min;
-                    // TODO: Full implementation needs backtracking for variable-length jumps
-                }
-                HexToken::Alternation(alts) => {
-                    // Try each alternative
-                    let mut matched = false;
-                    for _alt in alts {
-                        // TODO: Recursive matching for alternation groups
-                        matched = true;
-                        break;
-                    }
-                    if !matched {
-                        continue 'outer;
-                    }
-                }
-            }
-            token_idx += 1;
-        }
-
-        // Check if we matched all tokens
-        if token_idx == pattern.tokens.len() {
-            matches.push(Match::new(0, start, pos - start));
+    // Try matching at each starting position
+    for start in 0..data.len() {
+        if let Some(end_pos) = match_hex_pattern_recursive(data, &pattern.tokens, start, 0) {
+            matches.push(Match::new(0, start, end_pos - start));
         }
     }
 
     matches
+}
+
+/// Recursively match hex pattern tokens with backtracking support
+fn match_hex_pattern_recursive(
+    data: &[u8],
+    tokens: &[HexToken],
+    pos: usize,
+    token_idx: usize,
+) -> Option<usize> {
+    // Base case: all tokens matched
+    if token_idx >= tokens.len() {
+        return Some(pos);
+    }
+
+    // Check bounds
+    if pos >= data.len() {
+        // Allow matching to complete if no more tokens need data
+        if token_idx >= tokens.len() {
+            return Some(pos);
+        }
+        return None;
+    }
+
+    match &tokens[token_idx] {
+        HexToken::Byte(b) => {
+            if data[pos] == *b {
+                match_hex_pattern_recursive(data, tokens, pos + 1, token_idx + 1)
+            } else {
+                None
+            }
+        }
+        HexToken::Wildcard => {
+            match_hex_pattern_recursive(data, tokens, pos + 1, token_idx + 1)
+        }
+        HexToken::NibbleWildcard { high, low } => {
+            let byte = data[pos];
+            if let Some(h) = high {
+                if (byte >> 4) != *h {
+                    return None;
+                }
+            }
+            if let Some(l) = low {
+                if (byte & 0x0F) != *l {
+                    return None;
+                }
+            }
+            match_hex_pattern_recursive(data, tokens, pos + 1, token_idx + 1)
+        }
+        HexToken::Jump { min, max } => {
+            // Variable-length jump with backtracking
+            // Try skip amounts from min to max (or data.len() if unbounded)
+            let max_skip = match max {
+                Some(m) => std::cmp::min(*m, data.len().saturating_sub(pos)),
+                None => data.len().saturating_sub(pos), // Unbounded: try up to end of data
+            };
+
+            // Try each possible skip amount, starting from min
+            for skip in *min..=max_skip {
+                let new_pos = pos + skip;
+                if new_pos <= data.len() {
+                    if let Some(end) = match_hex_pattern_recursive(data, tokens, new_pos, token_idx + 1) {
+                        return Some(end);
+                    }
+                }
+            }
+            None
+        }
+        HexToken::Alternation(alts) => {
+            // Try each alternative (each alt is a Vec<HexToken>)
+            for alt in alts {
+                // Try to match this alternative's tokens
+                if let Some(end_pos) = match_alternation_tokens(data, alt, pos) {
+                    // Continue matching the rest of the main pattern
+                    if let Some(final_pos) = match_hex_pattern_recursive(data, tokens, end_pos, token_idx + 1) {
+                        return Some(final_pos);
+                    }
+                }
+            }
+            None
+        }
+    }
+}
+
+/// Match an alternation group (a list of HexTokens)
+fn match_alternation_tokens(data: &[u8], alt_tokens: &[HexToken], start_pos: usize) -> Option<usize> {
+    // Recursively match the alternation tokens
+    match_hex_pattern_recursive(data, alt_tokens, start_pos, 0)
 }
 
 // ==================== XOR Matching ====================
@@ -727,5 +830,97 @@ mod tests {
         assert_eq!(matches.len(), 2);
         assert_eq!(stats.bytes_scanned, 14);
         assert_eq!(stats.matches_found, 2);
+    }
+
+    #[test]
+    fn test_hex_jump_fixed() {
+        // Pattern: AA [2] BB - matches AA followed by exactly 2 bytes then BB
+        let patterns = vec![Pattern::new(0, b"AA [2] BB".to_vec(), PatternKind::Hex)];
+
+        let matcher = PatternMatcher::new(patterns).unwrap();
+
+        // Should match: AA XX XX BB
+        let data = &[0xAA, 0x11, 0x22, 0xBB];
+        let matches = matcher.scan(data);
+        assert!(!matches.is_empty(), "Should match AA [2] BB pattern");
+
+        // Should not match: AA XX BB (only 1 byte gap)
+        let data2 = &[0xAA, 0x11, 0xBB];
+        let matches2 = matcher.scan(data2);
+        assert!(matches2.is_empty(), "Should not match with only 1 byte gap");
+    }
+
+    #[test]
+    fn test_hex_jump_range() {
+        // Pattern: AA [1-3] BB - matches AA followed by 1-3 bytes then BB
+        let patterns = vec![Pattern::new(0, b"AA [1-3] BB".to_vec(), PatternKind::Hex)];
+
+        let matcher = PatternMatcher::new(patterns).unwrap();
+
+        // Should match with 1 byte gap
+        let data1 = &[0xAA, 0x11, 0xBB];
+        let matches1 = matcher.scan(data1);
+        assert!(!matches1.is_empty(), "Should match with 1 byte gap");
+
+        // Should match with 2 byte gap
+        let data2 = &[0xAA, 0x11, 0x22, 0xBB];
+        let matches2 = matcher.scan(data2);
+        assert!(!matches2.is_empty(), "Should match with 2 byte gap");
+
+        // Should match with 3 byte gap
+        let data3 = &[0xAA, 0x11, 0x22, 0x33, 0xBB];
+        let matches3 = matcher.scan(data3);
+        assert!(!matches3.is_empty(), "Should match with 3 byte gap");
+
+        // Should not match with 4 byte gap
+        let data4 = &[0xAA, 0x11, 0x22, 0x33, 0x44, 0xBB];
+        let matches4 = matcher.scan(data4);
+        assert!(matches4.is_empty(), "Should not match with 4 byte gap");
+    }
+
+    #[test]
+    fn test_hex_jump_unbounded() {
+        // Pattern: AA [2-] BB - matches AA followed by 2+ bytes then BB
+        let patterns = vec![Pattern::new(0, b"AA [2-] BB".to_vec(), PatternKind::Hex)];
+
+        let matcher = PatternMatcher::new(patterns).unwrap();
+
+        // Should not match with 1 byte gap
+        let data1 = &[0xAA, 0x11, 0xBB];
+        let matches1 = matcher.scan(data1);
+        assert!(matches1.is_empty(), "Should not match with 1 byte gap");
+
+        // Should match with 2 byte gap
+        let data2 = &[0xAA, 0x11, 0x22, 0xBB];
+        let matches2 = matcher.scan(data2);
+        assert!(!matches2.is_empty(), "Should match with 2 byte gap");
+
+        // Should match with many bytes gap
+        let data3 = &[0xAA, 0x11, 0x22, 0x33, 0x44, 0x55, 0xBB];
+        let matches3 = matcher.scan(data3);
+        assert!(!matches3.is_empty(), "Should match with many bytes gap");
+    }
+
+    #[test]
+    fn test_hex_nibble_wildcard() {
+        // Pattern: 4? ?A - matches nibble wildcards
+        let patterns = vec![Pattern::new(0, b"4? ?A".to_vec(), PatternKind::Hex)];
+
+        let matcher = PatternMatcher::new(patterns).unwrap();
+
+        // Should match 41 2A (4? matches any byte starting with 4, ?A matches any byte ending with A)
+        let data = &[0x41, 0x2A];
+        let matches = matcher.scan(data);
+        assert!(!matches.is_empty(), "Should match nibble wildcards");
+
+        // Should match 4F FA
+        let data2 = &[0x4F, 0xFA];
+        let matches2 = matcher.scan(data2);
+        assert!(!matches2.is_empty(), "Should match 4F FA");
+
+        // Should not match 51 2A (doesn't start with 4)
+        let data3 = &[0x51, 0x2A];
+        let matches3 = matcher.scan(data3);
+        assert!(matches3.is_empty(), "Should not match - first byte doesn't start with 4");
     }
 }
