@@ -6,5 +6,10 @@
 mod core;
 mod routing;
 
-pub use core::Gateway;
-pub use routing::{Router, Route, LoadBalanceStrategy};
+pub use core::{Gateway, GatewayStats, ServiceEndpoint};
+pub use routing::{
+    CircuitBreaker, CircuitBreakerConfig, CircuitState,
+    LoadBalanceStrategy, RetryConfig, Route, Router,
+    ServiceInstance, ServiceInstanceWithBreaker,
+    create_default_router,
+};

@@ -2,10 +2,14 @@
 
 #![allow(dead_code)]
 
+use chrono::{DateTime, Utc};
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::sync::RwLock;
+use std::time::Duration;
+use tokio::time::Instant;
 
 /// Load balancing strategy
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -129,6 +133,238 @@ impl ServiceInstance {
 
     pub fn decrement_connections(&self) {
         self.connections.fetch_sub(1, Ordering::SeqCst);
+    }
+}
+
+/// Circuit breaker state
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum CircuitState {
+    /// Circuit is closed - requests flow through normally
+    Closed,
+    /// Circuit is open - requests are rejected immediately
+    Open,
+    /// Circuit is half-open - limited requests allowed to test recovery
+    HalfOpen,
+}
+
+impl Default for CircuitState {
+    fn default() -> Self {
+        Self::Closed
+    }
+}
+
+/// Circuit breaker configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CircuitBreakerConfig {
+    /// Number of failures before opening circuit
+    pub failure_threshold: u32,
+    /// Time in seconds before attempting recovery
+    pub reset_timeout_secs: u64,
+    /// Number of successes required to close circuit from half-open
+    pub success_threshold: u32,
+    /// Time window for counting failures
+    pub window_secs: u64,
+}
+
+impl Default for CircuitBreakerConfig {
+    fn default() -> Self {
+        Self {
+            failure_threshold: 5,
+            reset_timeout_secs: 30,
+            success_threshold: 3,
+            window_secs: 60,
+        }
+    }
+}
+
+/// Circuit breaker for preventing cascading failures
+pub struct CircuitBreaker {
+    config: CircuitBreakerConfig,
+    state: RwLock<CircuitState>,
+    failures: AtomicU64,
+    successes: AtomicU64,
+    last_failure: RwLock<Option<Instant>>,
+    last_state_change: RwLock<Instant>,
+}
+
+impl CircuitBreaker {
+    /// Create a new circuit breaker
+    pub fn new(config: CircuitBreakerConfig) -> Self {
+        Self {
+            config,
+            state: RwLock::new(CircuitState::Closed),
+            failures: AtomicU64::new(0),
+            successes: AtomicU64::new(0),
+            last_failure: RwLock::new(None),
+            last_state_change: RwLock::new(Instant::now()),
+        }
+    }
+
+    /// Check if request should be allowed
+    pub fn should_allow(&self) -> bool {
+        let state = *self.state.read().unwrap();
+        match state {
+            CircuitState::Closed => true,
+            CircuitState::Open => {
+                // Check if we should transition to half-open
+                let last_change = *self.last_state_change.read().unwrap();
+                if last_change.elapsed() >= Duration::from_secs(self.config.reset_timeout_secs) {
+                    self.transition_to(CircuitState::HalfOpen);
+                    true
+                } else {
+                    false
+                }
+            }
+            CircuitState::HalfOpen => true,
+        }
+    }
+
+    /// Record a successful request
+    pub fn record_success(&self) {
+        let state = *self.state.read().unwrap();
+        match state {
+            CircuitState::Closed => {
+                // Reset failure count on success
+                self.failures.store(0, Ordering::SeqCst);
+            }
+            CircuitState::HalfOpen => {
+                let successes = self.successes.fetch_add(1, Ordering::SeqCst) + 1;
+                if successes >= self.config.success_threshold as u64 {
+                    self.transition_to(CircuitState::Closed);
+                }
+            }
+            CircuitState::Open => {}
+        }
+    }
+
+    /// Record a failed request
+    pub fn record_failure(&self) {
+        *self.last_failure.write().unwrap() = Some(Instant::now());
+        let state = *self.state.read().unwrap();
+
+        match state {
+            CircuitState::Closed => {
+                let failures = self.failures.fetch_add(1, Ordering::SeqCst) + 1;
+                if failures >= self.config.failure_threshold as u64 {
+                    self.transition_to(CircuitState::Open);
+                }
+            }
+            CircuitState::HalfOpen => {
+                // Single failure in half-open state opens the circuit
+                self.transition_to(CircuitState::Open);
+            }
+            CircuitState::Open => {}
+        }
+    }
+
+    /// Transition to a new state
+    fn transition_to(&self, new_state: CircuitState) {
+        let mut state = self.state.write().unwrap();
+        if *state != new_state {
+            *state = new_state;
+            *self.last_state_change.write().unwrap() = Instant::now();
+            self.failures.store(0, Ordering::SeqCst);
+            self.successes.store(0, Ordering::SeqCst);
+        }
+    }
+
+    /// Get current state
+    pub fn state(&self) -> CircuitState {
+        *self.state.read().unwrap()
+    }
+
+    /// Get failure count
+    pub fn failure_count(&self) -> u64 {
+        self.failures.load(Ordering::SeqCst)
+    }
+
+    /// Reset the circuit breaker
+    pub fn reset(&self) {
+        self.transition_to(CircuitState::Closed);
+    }
+}
+
+impl Default for CircuitBreaker {
+    fn default() -> Self {
+        Self::new(CircuitBreakerConfig::default())
+    }
+}
+
+/// Service instance with circuit breaker
+pub struct ServiceInstanceWithBreaker {
+    pub instance: ServiceInstance,
+    pub circuit_breaker: CircuitBreaker,
+    pub response_times: RwLock<Vec<Duration>>,
+    pub last_health_check: RwLock<Option<DateTime<Utc>>>,
+}
+
+impl ServiceInstanceWithBreaker {
+    pub fn new(url: impl Into<String>) -> Self {
+        Self {
+            instance: ServiceInstance::new(url),
+            circuit_breaker: CircuitBreaker::default(),
+            response_times: RwLock::new(Vec::with_capacity(100)),
+            last_health_check: RwLock::new(None),
+        }
+    }
+
+    pub fn with_circuit_breaker_config(mut self, config: CircuitBreakerConfig) -> Self {
+        self.circuit_breaker = CircuitBreaker::new(config);
+        self
+    }
+
+    pub fn record_response_time(&self, duration: Duration) {
+        let mut times = self.response_times.write().unwrap();
+        if times.len() >= 100 {
+            times.remove(0);
+        }
+        times.push(duration);
+    }
+
+    pub fn average_response_time(&self) -> Option<Duration> {
+        let times = self.response_times.read().unwrap();
+        if times.is_empty() {
+            None
+        } else {
+            let total: Duration = times.iter().sum();
+            Some(total / times.len() as u32)
+        }
+    }
+
+    pub fn is_available(&self) -> bool {
+        self.instance.healthy && self.circuit_breaker.should_allow()
+    }
+}
+
+/// Retry configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RetryConfig {
+    /// Maximum number of retry attempts
+    pub max_retries: u32,
+    /// Base delay between retries in milliseconds
+    pub base_delay_ms: u64,
+    /// Maximum delay between retries in milliseconds
+    pub max_delay_ms: u64,
+    /// Exponential backoff multiplier
+    pub backoff_multiplier: f64,
+}
+
+impl Default for RetryConfig {
+    fn default() -> Self {
+        Self {
+            max_retries: 3,
+            base_delay_ms: 100,
+            max_delay_ms: 5000,
+            backoff_multiplier: 2.0,
+        }
+    }
+}
+
+impl RetryConfig {
+    /// Calculate delay for a given retry attempt (0-indexed)
+    pub fn delay_for_attempt(&self, attempt: u32) -> Duration {
+        let delay_ms = (self.base_delay_ms as f64 * self.backoff_multiplier.powi(attempt as i32)) as u64;
+        Duration::from_millis(delay_ms.min(self.max_delay_ms))
     }
 }
 
@@ -336,5 +572,137 @@ mod tests {
         let url2 = router.get_service_url("test").unwrap();
 
         assert_ne!(url1, url2);
+    }
+
+    #[test]
+    fn test_circuit_breaker_closed_state() {
+        let breaker = CircuitBreaker::default();
+
+        // Should start closed
+        assert_eq!(breaker.state(), CircuitState::Closed);
+        assert!(breaker.should_allow());
+
+        // Record some successes
+        breaker.record_success();
+        breaker.record_success();
+        assert_eq!(breaker.state(), CircuitState::Closed);
+    }
+
+    #[test]
+    fn test_circuit_breaker_opens_on_failures() {
+        let config = CircuitBreakerConfig {
+            failure_threshold: 3,
+            ..Default::default()
+        };
+        let breaker = CircuitBreaker::new(config);
+
+        // Record failures up to threshold
+        breaker.record_failure();
+        assert_eq!(breaker.state(), CircuitState::Closed);
+        breaker.record_failure();
+        assert_eq!(breaker.state(), CircuitState::Closed);
+        breaker.record_failure();
+        assert_eq!(breaker.state(), CircuitState::Open);
+
+        // Should not allow requests when open
+        assert!(!breaker.should_allow());
+    }
+
+    #[test]
+    fn test_circuit_breaker_success_resets_failures() {
+        let config = CircuitBreakerConfig {
+            failure_threshold: 3,
+            ..Default::default()
+        };
+        let breaker = CircuitBreaker::new(config);
+
+        breaker.record_failure();
+        breaker.record_failure();
+        assert_eq!(breaker.failure_count(), 2);
+
+        // Success resets failure count
+        breaker.record_success();
+        assert_eq!(breaker.failure_count(), 0);
+    }
+
+    #[test]
+    fn test_retry_config_exponential_backoff() {
+        let config = RetryConfig {
+            base_delay_ms: 100,
+            max_delay_ms: 5000,
+            backoff_multiplier: 2.0,
+            ..Default::default()
+        };
+
+        // First attempt: 100ms
+        assert_eq!(config.delay_for_attempt(0), Duration::from_millis(100));
+        // Second attempt: 200ms
+        assert_eq!(config.delay_for_attempt(1), Duration::from_millis(200));
+        // Third attempt: 400ms
+        assert_eq!(config.delay_for_attempt(2), Duration::from_millis(400));
+        // Fourth attempt: 800ms
+        assert_eq!(config.delay_for_attempt(3), Duration::from_millis(800));
+    }
+
+    #[test]
+    fn test_retry_config_max_delay_cap() {
+        let config = RetryConfig {
+            base_delay_ms: 100,
+            max_delay_ms: 500,
+            backoff_multiplier: 2.0,
+            ..Default::default()
+        };
+
+        // Large attempt should be capped at max
+        assert_eq!(config.delay_for_attempt(10), Duration::from_millis(500));
+    }
+
+    #[test]
+    fn test_service_instance_with_breaker() {
+        let instance = ServiceInstanceWithBreaker::new("http://localhost:8000");
+
+        assert!(instance.is_available());
+        assert!(instance.average_response_time().is_none());
+
+        // Record some response times
+        instance.record_response_time(Duration::from_millis(100));
+        instance.record_response_time(Duration::from_millis(200));
+
+        // Average should be 150ms
+        let avg = instance.average_response_time().unwrap();
+        assert_eq!(avg, Duration::from_millis(150));
+    }
+
+    #[test]
+    fn test_service_instance_connection_tracking() {
+        let instance = ServiceInstance::new("http://localhost:8000");
+
+        assert_eq!(instance.connection_count(), 0);
+
+        instance.increment_connections();
+        instance.increment_connections();
+        assert_eq!(instance.connection_count(), 2);
+
+        instance.decrement_connections();
+        assert_eq!(instance.connection_count(), 1);
+    }
+
+    #[test]
+    fn test_least_connections_load_balancing() {
+        let mut router = Router::new().with_strategy(LoadBalanceStrategy::LeastConnections);
+
+        let instance1 = ServiceInstance::new("http://localhost:8001");
+        instance1.increment_connections();
+        instance1.increment_connections();
+
+        let instance2 = ServiceInstance::new("http://localhost:8002");
+        // instance2 has 0 connections
+
+        router.add_service_instance("test", instance1);
+        router.add_service_instance("test", instance2);
+
+        // Should select instance with least connections
+        let url = router.get_service_url("test").unwrap();
+        assert_eq!(url, "http://localhost:8002");
     }
 }
