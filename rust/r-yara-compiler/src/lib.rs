@@ -1196,14 +1196,27 @@ impl Compiler {
     }
 }
 
-/// Serialize hex tokens to bytes for pattern matching
+/// Serialize hex tokens to ASCII hex format for pattern matching
+///
+/// The matcher's `parse_hex_pattern` expects ASCII hex format like "4D 5A" rather than
+/// raw bytes. This function converts parsed hex tokens back to ASCII hex representation.
 fn serialize_hex_tokens(tokens: &[r_yara_parser::HexToken]) -> Vec<u8> {
     let mut bytes = Vec::new();
 
-    for token in tokens {
+    for (i, token) in tokens.iter().enumerate() {
+        // Add space separator between tokens (except for first)
+        if i > 0 && !matches!(token, r_yara_parser::HexToken::Jump { .. } | r_yara_parser::HexToken::Alternation(_)) {
+            if let Some(prev) = tokens.get(i.saturating_sub(1)) {
+                if !matches!(prev, r_yara_parser::HexToken::Jump { .. } | r_yara_parser::HexToken::Alternation(_)) {
+                    bytes.push(b' ');
+                }
+            }
+        }
+
         match token {
             r_yara_parser::HexToken::Byte(b) => {
-                bytes.push(*b);
+                // Output as ASCII hex: 0x4D -> "4D"
+                bytes.extend(format!("{:02X}", b).as_bytes());
             }
             r_yara_parser::HexToken::Wildcard => {
                 bytes.extend(b"??");
@@ -1223,8 +1236,8 @@ fn serialize_hex_tokens(tokens: &[r_yara_parser::HexToken]) -> Vec<u8> {
             }
             r_yara_parser::HexToken::Alternation(alts) => {
                 bytes.push(b'(');
-                for (i, alt) in alts.iter().enumerate() {
-                    if i > 0 {
+                for (j, alt) in alts.iter().enumerate() {
+                    if j > 0 {
                         bytes.push(b'|');
                     }
                     bytes.extend(serialize_hex_tokens(alt));
@@ -1695,5 +1708,65 @@ mod tests {
 
         // Test non-existent rule
         assert!(compiled.get_rule("nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_hex_pattern_serialization() {
+        use r_yara_matcher::PatternKind;
+
+        let source = r#"
+            rule hex_test {
+                strings:
+                    $mz = { 4D 5A }
+                condition:
+                    $mz
+            }
+        "#;
+
+        let ast = parse(source).unwrap();
+        let mut compiler = Compiler::new();
+        let compiled = compiler.compile(&ast).unwrap();
+
+        // Check pattern was compiled correctly
+        assert_eq!(compiled.patterns.len(), 1);
+        let pattern = &compiled.patterns[0];
+
+        // Verify kind is Hex
+        assert_eq!(pattern.kind, PatternKind::Hex);
+
+        // Verify bytes are ASCII hex format "4D 5A" not raw bytes [0x4D, 0x5A]
+        let pattern_str = String::from_utf8_lossy(&pattern.bytes);
+        assert!(
+            pattern_str.contains("4D") && pattern_str.contains("5A"),
+            "Expected ASCII hex format, got: {:?} (bytes: {:?})",
+            pattern_str,
+            pattern.bytes
+        );
+    }
+
+    #[test]
+    fn test_hex_pattern_with_wildcards() {
+        let source = r#"
+            rule wildcard_test {
+                strings:
+                    $a = { 4D ?? 90 }
+                condition:
+                    $a
+            }
+        "#;
+
+        let ast = parse(source).unwrap();
+        let mut compiler = Compiler::new();
+        let compiled = compiler.compile(&ast).unwrap();
+
+        let pattern = &compiled.patterns[0];
+        let pattern_str = String::from_utf8_lossy(&pattern.bytes);
+
+        // Should contain wildcards
+        assert!(
+            pattern_str.contains("??"),
+            "Expected wildcards in pattern: {:?}",
+            pattern_str
+        );
     }
 }

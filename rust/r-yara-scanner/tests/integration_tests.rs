@@ -580,7 +580,6 @@ fn test_full_pipeline_simple_rules() {
 }
 
 #[test]
-#[ignore] // TODO: Hex pattern matching needs refinement in the parser/matcher
 fn test_full_pipeline_pe_detection() {
     // Use a simpler inline rule instead of the complex pe_rule.yar
     let source = r#"
@@ -614,7 +613,6 @@ fn test_full_pipeline_pe_detection() {
 }
 
 #[test]
-#[ignore] // TODO: Hex pattern matching needs refinement in the parser/matcher
 fn test_full_pipeline_elf_detection() {
     // Use a simpler inline rule instead of the complex elf_rule.yar
     let source = r#"

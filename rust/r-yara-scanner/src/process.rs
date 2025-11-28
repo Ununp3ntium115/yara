@@ -115,7 +115,6 @@ impl ProcessScanner {
     #[cfg(target_os = "linux")]
     pub fn scan_pid(&self, pid: u32) -> ScanResult<ProcessScanResult> {
         use std::fs::{self, File};
-        use std::io::{Read, Seek, SeekFrom};
 
         let maps_path = format!("/proc/{}/maps", pid);
         let mem_path = format!("/proc/{}/mem", pid);

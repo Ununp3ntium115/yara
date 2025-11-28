@@ -37,7 +37,7 @@
 //! }
 //! ```
 
-use crate::error::{ScanError, ScanResult};
+use crate::error::ScanResult;
 use crate::{RuleMatch, Scanner};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};

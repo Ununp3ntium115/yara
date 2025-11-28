@@ -419,78 +419,47 @@ impl<'source> Parser<'source> {
     /// Parse hex string content between { and }
     /// Collects tokens until RBrace and parses them as hex tokens
     fn parse_hex_string_content(&mut self) -> Result<Vec<HexToken>, ParseError> {
-        let mut hex_content = String::new();
+        // Use span-based extraction to get the raw hex content from source
+        // This avoids the issue where the lexer splits "4D" into Number(4) + Identifier("D")
+        let start_pos = self.current_span().start;
         let mut depth = 1; // We've already consumed the opening {
 
         while depth > 0 {
             match self.peek() {
                 Some(Token::LBrace) => {
                     self.advance();
-                    hex_content.push('{');
                     depth += 1;
                 }
                 Some(Token::RBrace) => {
-                    self.advance();
                     depth -= 1;
                     if depth > 0 {
-                        hex_content.push('}');
+                        self.advance();
                     }
                 }
-                Some(Token::LParen) => {
-                    self.advance();
-                    hex_content.push('(');
-                }
-                Some(Token::RParen) => {
-                    self.advance();
-                    hex_content.push(')');
-                }
-                Some(Token::LBracket) => {
-                    self.advance();
-                    hex_content.push('[');
-                }
-                Some(Token::RBracket) => {
-                    self.advance();
-                    hex_content.push(']');
-                }
-                Some(Token::Pipe) => {
-                    self.advance();
-                    hex_content.push('|');
-                }
-                Some(Token::Minus) => {
-                    self.advance();
-                    hex_content.push('-');
-                }
-                Some(Token::Identifier(s)) => {
-                    hex_content.push(' ');
-                    hex_content.push_str(&s);
+                Some(Token::LParen) | Some(Token::RParen) |
+                Some(Token::LBracket) | Some(Token::RBracket) |
+                Some(Token::Pipe) | Some(Token::Minus) |
+                Some(Token::Question) | Some(Token::Tilde) => {
                     self.advance();
                 }
-                Some(Token::Number(n)) => {
-                    hex_content.push(' ');
-                    match n {
-                        NumberValue::Integer(i) => hex_content.push_str(&format!("{:02X}", i)),
-                        NumberValue::Float(f) => hex_content.push_str(&format!("{}", f)),
-                    }
+                Some(Token::Identifier(_)) | Some(Token::Number(_)) => {
                     self.advance();
-                }
-                Some(Token::Question) => {
-                    self.advance();
-                    hex_content.push('?');
-                }
-                Some(Token::Tilde) => {
-                    self.advance();
-                    hex_content.push('~');
                 }
                 None => {
                     return Err(ParseError::UnexpectedEof);
                 }
                 _ => {
-                    // Skip unknown tokens
                     self.advance();
                 }
             }
         }
 
+        // Get end position before consuming the closing brace
+        let end_pos = self.current_span().start;
+        self.advance(); // Consume the closing }
+
+        // Extract raw source text and parse it
+        let hex_content = &self.source[start_pos..end_pos];
         Ok(parse_hex_tokens(&format!("{{{}}}", hex_content)))
     }
 
