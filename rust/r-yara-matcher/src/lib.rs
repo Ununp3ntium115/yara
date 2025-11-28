@@ -235,6 +235,22 @@ impl PatternMatcher {
                     } else {
                         pattern.bytes.clone()
                     };
+
+                    // Check for XOR modifier and generate variants
+                    if let Some((min, max)) = pattern.modifiers.xor {
+                        for variant in generate_xor_variants(&bytes, min, max) {
+                            ac_patterns.push((variant, pattern.id));
+                        }
+                    }
+
+                    // Check for Base64 modifier and generate variants
+                    if pattern.modifiers.base64 {
+                        for variant in generate_base64_variants(&bytes) {
+                            ac_patterns.push((variant, pattern.id));
+                        }
+                    }
+
+                    // Always add the original pattern
                     ac_patterns.push((bytes, pattern.id));
                 }
                 PatternKind::LiteralNocase | PatternKind::WideNocase => {
@@ -250,13 +266,39 @@ impl PatternMatcher {
                         pattern.bytes.clone()
                     };
 
-                    // Add lowercase version
+                    // Collect all case variants first
                     let lower: Vec<u8> = bytes.iter().map(|b| b.to_ascii_lowercase()).collect();
-                    ac_patterns.push((lower, pattern.id));
+                    let upper: Vec<u8> = bytes.iter().map(|b| b.to_ascii_uppercase()).collect();
+
+                    // Check for XOR modifier and generate variants for each case variant
+                    if let Some((min, max)) = pattern.modifiers.xor {
+                        for variant in generate_xor_variants(&lower, min, max) {
+                            ac_patterns.push((variant, pattern.id));
+                        }
+                        if upper != lower {
+                            for variant in generate_xor_variants(&upper, min, max) {
+                                ac_patterns.push((variant, pattern.id));
+                            }
+                        }
+                    }
+
+                    // Check for Base64 modifier and generate variants
+                    if pattern.modifiers.base64 {
+                        for variant in generate_base64_variants(&lower) {
+                            ac_patterns.push((variant, pattern.id));
+                        }
+                        if upper != lower {
+                            for variant in generate_base64_variants(&upper) {
+                                ac_patterns.push((variant, pattern.id));
+                            }
+                        }
+                    }
+
+                    // Add lowercase version
+                    ac_patterns.push((lower.clone(), pattern.id));
 
                     // Add uppercase version (might duplicate but AC handles it)
-                    let upper: Vec<u8> = bytes.iter().map(|b| b.to_ascii_uppercase()).collect();
-                    if upper != bytes {
+                    if upper != lower {
                         ac_patterns.push((upper, pattern.id));
                     }
                 }
@@ -282,11 +324,22 @@ impl PatternMatcher {
             }
         }
 
+        // Deduplicate patterns before building AC automaton
+        // This handles cases where XOR/Base64 variants might produce duplicates
+        let mut seen_patterns: HashMap<Vec<u8>, PatternId> = HashMap::new();
+        let mut deduped_patterns: Vec<(Vec<u8>, PatternId)> = Vec::new();
+        for (bytes, id) in ac_patterns {
+            if let std::collections::hash_map::Entry::Vacant(e) = seen_patterns.entry(bytes.clone()) {
+                e.insert(id);
+                deduped_patterns.push((bytes, id));
+            }
+        }
+
         // Build AC automaton if we have literal patterns
-        let (ac, ac_pattern_map) = if !ac_patterns.is_empty() {
+        let (ac, ac_pattern_map) = if !deduped_patterns.is_empty() {
             let builder = DoubleArrayAhoCorasickBuilder::new();
-            let pattern_map: Vec<PatternId> = ac_patterns.iter().map(|(_, id)| *id).collect();
-            let patterns_only: Vec<&[u8]> = ac_patterns.iter().map(|(p, _)| p.as_slice()).collect();
+            let pattern_map: Vec<PatternId> = deduped_patterns.iter().map(|(_, id)| *id).collect();
+            let patterns_only: Vec<&[u8]> = deduped_patterns.iter().map(|(p, _)| p.as_slice()).collect();
 
             let ac = builder
                 .build(patterns_only)
@@ -666,9 +719,12 @@ pub fn generate_base64_variants(pattern: &[u8]) -> Vec<Vec<u8>> {
     let encoded = general_purpose::STANDARD.encode(pattern);
     variants.push(encoded.into_bytes());
 
-    // Also add URL-safe variant
+    // Also add URL-safe variant (only if different from standard)
     let url_encoded = general_purpose::URL_SAFE.encode(pattern);
-    variants.push(url_encoded.into_bytes());
+    let url_bytes = url_encoded.into_bytes();
+    if url_bytes != variants[0] {
+        variants.push(url_bytes);
+    }
 
     variants
 }
@@ -923,5 +979,112 @@ mod tests {
         let data3 = &[0x51, 0x2A];
         let matches3 = matcher.scan(data3);
         assert!(matches3.is_empty(), "Should not match - first byte doesn't start with 4");
+    }
+
+    #[test]
+    fn test_xor_modifier_integration() {
+        // Test that XOR modifier actually generates variants and matches
+        let mut pattern = Pattern::new(0, b"MZ".to_vec(), PatternKind::Literal);
+        pattern.modifiers.xor = Some((0x01, 0x03)); // XOR keys 1, 2, 3
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should match original "MZ"
+        let matches1 = matcher.scan(b"MZ");
+        assert!(!matches1.is_empty(), "Should match original pattern");
+
+        // Should match XOR'd with key 0x01
+        let xor1: Vec<u8> = b"MZ".iter().map(|b| b ^ 0x01).collect();
+        let matches2 = matcher.scan(&xor1);
+        assert!(!matches2.is_empty(), "Should match XOR key 0x01");
+
+        // Should match XOR'd with key 0x02
+        let xor2: Vec<u8> = b"MZ".iter().map(|b| b ^ 0x02).collect();
+        let matches3 = matcher.scan(&xor2);
+        assert!(!matches3.is_empty(), "Should match XOR key 0x02");
+
+        // Should match XOR'd with key 0x03
+        let xor3: Vec<u8> = b"MZ".iter().map(|b| b ^ 0x03).collect();
+        let matches4 = matcher.scan(&xor3);
+        assert!(!matches4.is_empty(), "Should match XOR key 0x03");
+
+        // Should NOT match XOR'd with key 0x04 (out of range)
+        let xor4: Vec<u8> = b"MZ".iter().map(|b| b ^ 0x04).collect();
+        let matches5 = matcher.scan(&xor4);
+        assert!(matches5.is_empty(), "Should NOT match XOR key 0x04 (out of range)");
+    }
+
+    #[test]
+    fn test_base64_modifier_integration() {
+        use base64::{engine::general_purpose, Engine};
+
+        // Test that Base64 modifier generates variants and matches
+        let mut pattern = Pattern::new(0, b"test".to_vec(), PatternKind::Literal);
+        pattern.modifiers.base64 = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should match original "test"
+        let matches1 = matcher.scan(b"test");
+        assert!(!matches1.is_empty(), "Should match original pattern");
+
+        // Should match Base64 encoded "test" -> "dGVzdA=="
+        let encoded = general_purpose::STANDARD.encode(b"test");
+        let matches2 = matcher.scan(encoded.as_bytes());
+        assert!(!matches2.is_empty(), "Should match Base64 encoded pattern");
+
+        // Should NOT match random data
+        let matches3 = matcher.scan(b"random_data");
+        assert!(matches3.is_empty(), "Should NOT match random unrelated data");
+    }
+
+    #[test]
+    fn test_base64_url_safe_variant() {
+        use base64::{engine::general_purpose, Engine};
+
+        // Test with pattern that produces different URL-safe and standard Base64
+        // Use binary data that contains bytes that encode to +/ in standard base64
+        let binary_data = vec![0xfb, 0xef, 0xbe]; // encodes to "+++" in standard, "---" in URL-safe
+        let mut pattern = Pattern::new(0, binary_data.clone(), PatternKind::Literal);
+        pattern.modifiers.base64 = true;
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should match standard Base64 encoded
+        let encoded = general_purpose::STANDARD.encode(&binary_data);
+        let matches1 = matcher.scan(encoded.as_bytes());
+        assert!(!matches1.is_empty(), "Should match standard Base64");
+
+        // Should match URL-safe Base64 encoded
+        let url_encoded = general_purpose::URL_SAFE.encode(&binary_data);
+        let matches2 = matcher.scan(url_encoded.as_bytes());
+        assert!(!matches2.is_empty(), "Should match URL-safe Base64");
+    }
+
+    #[test]
+    fn test_xor_with_nocase_modifier() {
+        // Test XOR combined with nocase
+        let mut pattern = Pattern::new(0, b"test".to_vec(), PatternKind::LiteralNocase);
+        pattern.modifiers.xor = Some((0x01, 0x01)); // Single XOR key
+
+        let matcher = PatternMatcher::new(vec![pattern]).unwrap();
+
+        // Should match lowercase
+        let matches1 = matcher.scan(b"test");
+        assert!(!matches1.is_empty(), "Should match lowercase");
+
+        // Should match uppercase
+        let matches2 = matcher.scan(b"TEST");
+        assert!(!matches2.is_empty(), "Should match uppercase");
+
+        // Should match XOR'd lowercase
+        let xor_lower: Vec<u8> = b"test".iter().map(|b| b ^ 0x01).collect();
+        let matches3 = matcher.scan(&xor_lower);
+        assert!(!matches3.is_empty(), "Should match XOR'd lowercase");
+
+        // Should match XOR'd uppercase
+        let xor_upper: Vec<u8> = b"TEST".iter().map(|b| b ^ 0x01).collect();
+        let matches4 = matcher.scan(&xor_upper);
+        assert!(!matches4.is_empty(), "Should match XOR'd uppercase");
     }
 }
