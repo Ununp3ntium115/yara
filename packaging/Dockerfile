@@ -62,7 +62,7 @@ RUN strip target/release/r-yara-cli target/release/r-yara-pyro
 # ============================================
 # Stage 2: Runtime image
 # ============================================
-FROM alpine:3.19
+FROM alpine:3.23.4
 
 # Install runtime dependencies
 RUN apk add --no-cache \
